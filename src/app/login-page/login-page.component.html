@@ -1,0 +1,37 @@
+<div class="loginWrapper">
+  <!-- Title and splash image -->
+  <div id="intro">
+    <h1>Veranus</h1>
+    <img src="https://www.zillarules.com/-/media/images/zilla-na/us/blog-articles/myths-facts-about-bearded-dragon-care/bearded-dragon.jpg?h=350&w=350&la=en&hash=BB45C333590D6C0AF6E426FC419D6A3B224212BE">
+  </div>
+
+  <!-- Box for logging in or creating new account -->
+  <div class="loginBox">
+    <!-- Toggle between log in or new account -->
+    <div class="toggle">
+      <span class="loginToggle"
+            (click)="newUser=false"
+            [style.background-color]="newUser ? '#553739' : '#955E42'">Log in</span>
+      <span 
+        class="loginToggle"
+        (click)="newUser=true"
+        [style.background-color]="newUser ? '#955E42' : '#553739'">New User</span>
+    </div><br>
+
+    <!-- Input fields -->
+    <label for="usernameInput">Username</label><br>
+    <input #Username id="usernameInput"><br>
+    <label for="passwordInput">Password</label><br>
+    <input #Password id="passwordInput" type="password"><br>
+
+    <!-- Confirm password field, only shown when creating new user -->
+    <div [style.display]="newUser ? 'block' : 'none'">
+      <label for="confirmPasswordInput">Confirm Password</label><br>
+      <input #ConfirmPassword id="confirmPasswordInput" type="password"><br>
+    </div>
+
+    <!-- Submit buttons -->
+    <input class="submitButton" type="button" value="Log In" (click)="attemptLogin(Username.value, Password.value)" [style.display]="newUser ? 'none' : 'block'">
+    <input class="submitButton" type="button" value="Create User" (click)="attemptNewUser(Username.value, Password.value, ConfirmPassword.value)" [style.display]="newUser ? 'block' : 'none'">
+  </div>
+</div>

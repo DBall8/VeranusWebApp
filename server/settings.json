@@ -1,0 +1,5 @@
+{
+    "serverPort": 8002,
+    "serialPort": "COM6",
+    "baudRate": 9600
+}
