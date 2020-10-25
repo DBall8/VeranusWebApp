@@ -18,6 +18,12 @@
         [style.background-color]="newUser ? '#955E42' : '#553739'">New User</span>
     </div><br>
 
+    <!-- Error message -->
+    <div class="errorBox"
+         [style.display]="showError ? 'block' : 'none'">
+      {{errorMessage}}
+    </div>
+
     <!-- Input fields -->
     <label for="usernameInput">Username</label><br>
     <input #Username id="usernameInput"><br>
@@ -31,7 +37,7 @@
     </div>
 
     <!-- Submit buttons -->
-    <input class="submitButton" type="button" value="Log In" (click)="attemptLogin(Username.value, Password.value)" [style.display]="newUser ? 'none' : 'block'">
-    <input class="submitButton" type="button" value="Create User" (click)="attemptNewUser(Username.value, Password.value, ConfirmPassword.value)" [style.display]="newUser ? 'block' : 'none'">
+    <input class="submitButton" type="button" value="Log In" (click)="attemptLogin()" [style.display]="newUser ? 'none' : 'block'">
+    <input class="submitButton" type="button" value="Create User" (click)="attemptNewUser()" [style.display]="newUser ? 'block' : 'none'">
   </div>
 </div>

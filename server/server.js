@@ -117,8 +117,6 @@ function startServer()
                 }
 
                 console.log("New user '" + body.username + "' successfully added");
-                db.listUsers();
-
                 sendObject(res, {success: true});
             }
         })
@@ -170,7 +168,13 @@ function startServer()
         }
     });
 
-    db.testConnection();
+    db.connect().then((result) =>
+    {
+        if (result) console.log("DB connection SUCCEEDED");
+        else console.log("DB connection FAILED");
+
+        db.addDevice("Damon", "newest");
+    });
 }
 
 function sendFile(res, filename, type)
