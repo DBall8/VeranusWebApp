@@ -6,12 +6,16 @@ import { AppComponent } from './app.component';
 import { LoginPageComponent } from './login-page/login-page.component';
 import { AppRoutingModule } from './app-routing.module';
 import { MainPageComponent } from './main-page/main-page.component';
+import { DevicePageComponent } from './device-page/device-page.component';
+import { DeviceSettingsPageComponent } from './device-settings-page/device-settings-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginPageComponent,
-    MainPageComponent
+    MainPageComponent,
+    DevicePageComponent,
+    DeviceSettingsPageComponent
   ],
   imports: [
     BrowserModule,
