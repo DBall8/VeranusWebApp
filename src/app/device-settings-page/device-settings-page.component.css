@@ -1,0 +1,110 @@
+.centeredArea
+{
+    display: flex;
+    justify-content: center;
+}
+
+.pageArea
+{
+    background-color:  #553739;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    margin: auto;
+}
+
+.pageSection
+{
+    background-color:  #955E42;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px auto;
+    max-width: 600px;
+}
+
+h2
+{
+    font-size: 3em;
+    padding: 10px;
+    margin: 0;
+}
+
+.back
+{
+    font-size: 1.4em;
+    text-decoration: none;
+    margin: 10px;
+    padding: 10px;
+    display: inline-block;
+}
+
+.thresholdTable
+{
+    background-color: #b07c5d;
+    border: 2px solid black;
+}
+
+.topRow
+{
+    background-color: #262626;
+}
+
+.thresholdTable td, th
+{
+    padding: 20px 5px;
+    border: 1px solid black;
+}
+
+th
+{
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.dangerText
+{
+    color: #dd4f4f;
+}
+
+.warningText
+{
+    color: #d9d936;
+}
+
+.thresholdType
+{
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.thresholdInput
+{
+    width: 50px;
+    align-self: end;
+    text-align: right;
+}
+
+.thresholdInputCell
+{
+    text-align: right;
+}
+
+.saveSettingsButton
+{
+    font-size: 1.5em;
+}
+
+.deleteDeviceButton
+{
+    font-size: 1.5em;
+    background-color: indianred;
+}
+
+  .deleteDeviceButton:hover {
+    background-color: #dc7070;
+  }
+  
+  .deleteDeviceButton:focus{
+    background-color: #b82a2a;;
+  }

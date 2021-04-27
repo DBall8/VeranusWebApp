@@ -1,0 +1,3 @@
+<p [style.display]="timeMs > 0 ? 'inline' : 'none'">{{getMonth(timeMs)}}/{{getDay(timeMs)}} at {{getHour(timeMs)}}:{{getMinute(timeMs)}} {{pm? "PM" : "AM"}}</p>
+<p [style.display]="timeMs <= 0 ? 'inline' : 'none'">Never updated</p>
+

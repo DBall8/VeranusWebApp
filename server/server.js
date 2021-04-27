@@ -1,22 +1,28 @@
 var express = require('express'),
     http = require('http'),
     fs = require('fs'),
-    SerialPort = require('serialport'),
     url = require('url'),
     sessions = require('client-sessions'),
-    crypto = require('crypto'),
-    db = require('./db/db')
+    db = require('./components/db-sqlite'),
+    serial = require('./components/SerialReader'),
+    utilities = require('./components/ServerUtilities'),
+    userManager = require('./components/UserManager'),
+    deviceManager = require('./components/DeviceManager'),
+    socketControl = require('./components/SocketControl')
 
 // Configuration settings
 const SETTINGS = require(__dirname + "/settings.json");
 
-const app = express();
-const server = http.createServer(app);
+const app = createApp();
+const server = startServer(app);
+startDatabase();
+startSerial();
+socketControl.startSocket(server);
 
-startServer();
-
-function startServer()
+function createApp()
 {
+    var app = express();
+
     var secretStr = process.env.SECRET_STR ? process.env.SECRET_STR : "qwdvboiuygfc345tf3df789";
     app.use(sessions({
         cookieName: 'session',
@@ -44,95 +50,32 @@ function startServer()
             req.username = req.session.username;
         }
 
+        if (req.session && req.session.userId)
+        {
+            req.userId = req.session.userId;
+        }
+
         next();
     });
 
-    // Handle login attempts
-    app.post('/login', (req, res) =>
-    {
-        body = JSON.parse(req.body);
-        if (!body.username || !body.password)
-        {
-            // Insufficient data in request
-            sendError(res);
-            return;
-        }
+    // Handle user account requests
+    app.post('/login', userManager.attemptLogin);       // Existing user login attempt
+    app.post('/newuser', userManager.attemptNewUser);   // Create new user attempt
+    app.get('/logout', userManager.logout);             // Log out user session
 
-        db.getUser(body.username).then((user) =>
-        {
-            if (user == null)
-            {
-                sendObject(res, {success: false, reason: "User does not exist"});
-                return;
-            }
+    // Handle device requests
+    app.get('/device', requireLogin, deviceManager.getDevices);       // Get list of devices for a user
+    app.put('/device', requireLogin, deviceManager.addDevice);        // Add a device
+    app.delete('/device', requireLogin, deviceManager.deleteDevice)   // Delete a device
 
-            if (verifyPassword(user.salt, user.hash, body.password))
-            {
-                // Login successful
-                console.log("User '" + body.username + "' logged in");
-                sendObject(res, {success: true});
-            }
-            else
-            {
-                // Bad password
-                sendObject(res, {success: false, reason: "Incorrect password"});
-            }
-        })
-        .catch((err) =>
-        {
-            console.log("Failed to get user:")
-            console.log(err);
-            sendObject(res, {success: false, reason: "Server error"});
-        });
-    });
+    // Handle readings requests
+    app.get('/readings', requireLogin, deviceManager.getReadings);    // Get list of a device's latest readings
 
-    // Handle new user requests
-    app.post('/newuser', (req, res) =>
-    {
-        body = JSON.parse(req.body);
+    // Handle range requests
+    app.get('/ranges', requireLogin, deviceManager.getRanges);        // Get the ranges for readings for a device
+    app.post('/ranges', requireLogin, deviceManager.updateRanges);    // Update the ranges for a device
 
-        if (!body.username || !body.password)
-        {
-            // Insufficient data in request
-            sendErrorsendError(res);
-            return;
-        }
-
-        // Encrypt password
-        encryptedPassword = encryptPassword(body.password);
-
-        // Attempt to add new user to database
-        db.addUser(body.username, encryptedPassword.salt, encryptedPassword.hash)
-        .then((userAlreadyExists) =>
-        {
-            if (userAlreadyExists)
-            {
-                sendObject(res, {success: false, reason: "User already exists"});
-            }
-            else
-            {
-                if (body.username)
-                {
-                    req.session.username = body.username;
-                }
-
-                console.log("New user '" + body.username + "' successfully added");
-                sendObject(res, {success: true});
-            }
-        })
-        .catch((err) =>
-        {
-            console.log("Could not add new user.")
-            console.log(err);
-            sendObject(res, {success: false, reason: "Server error"});
-        });
-    });
-
-    app.get('/logout', (req, res) =>
-    {
-        req.session.reset();
-        res.redirect('/login');
-    });
+    app.get('/update-sensor', () => console.log("RECEIVED UPDATE"));
 
     // Direct all other requests to file requests
     app.all('*', (req, res, next) =>
@@ -151,12 +94,19 @@ function startServer()
     
         // Send file if it exists
         if(uri.pathname !== '/' && fs.existsSync(path)){
-            sendFile(res, path, fileType);
+            utilities.sendFile(res, path, fileType);
         }
         else{
-            sendFile(res, __dirname + '/../dist/VeranusWebApp/index.html');
+            utilities.sendFile(res, __dirname + '/../dist/VeranusWebApp/index.html');
         }
     });
+
+    return app;
+}
+
+function startServer(app)
+{
+    var server = http.createServer(app);
 
     // Launch server
     server.listen(SETTINGS.serverPort, () =>
@@ -168,62 +118,46 @@ function startServer()
         }
     });
 
-    db.connect().then((result) =>
-    {
-        if (result) console.log("DB connection SUCCEEDED");
-        else console.log("DB connection FAILED");
+    return server;
+}
 
-        db.addDevice("Damon", "newest");
+function startDatabase()
+{
+    // Launch the database
+    db.connect()
+        .then(() =>
+        {
+            console.log("DB connection SUCCEEDED");
+        })
+        .catch((err) =>
+        {
+            console.log("DB connection FAILED");
+            console.log(err);
+        });
+}
+
+function startSerial()
+{
+    // Start serial driver to probe devices for readings
+    var devices = SETTINGS.devices;
+    serial.start(SETTINGS.serialPort, SETTINGS.baudRate, devices, devices.length);
+    serial.dataReceivedEvent.on("data", (data) =>
+    {
+        var hardwareId = data.probeId.toString();
+        delete data.probeId;
+        deviceManager.addReading(hardwareId, data);
+        socketControl.sendReading(hardwareId, data);
     });
 }
 
-function sendFile(res, filename, type)
+function requireLogin(req, res, next)
 {
-    type = type || 'text/html'
-    fs.readFile(filename, function (error, content) {
-        if (error) {
-            console.log(error);
-        }
-        res.writeHead(200, { 'Content-type': type });
-        res.end(content, 'utf-8');
-
-    })
-}
-
-function sendObject(res, object)
-{
-    res.writeHead(200, {'Conent-type': 'application/json'});
-    res.end(JSON.stringify(object));
-}
-
-function sendError(res)
-{
-    res.writeHead(400)
-    res.end();
-}
-
-function encryptPassword(rawPassword)
-{
-    // generate a 128 byte salt
-    var salt = crypto.randomBytes(128).toString('base64');
-
-    // create a hash with the salt
-    var hash = crypto.createHmac('sha512', salt);
-
-    // update the hash with the password
-    hash.update(rawPassword);
-
-    // Return the encrypted password in base64 form
-    return {
-        salt: salt,
-        hash: hash.digest('base64')
+    if (!req.session || !req.session.username || !req.session.userId)
+    {
+        utilities.sendObject(res, {sessionExpired: true});
     }
-}
-
-function verifyPassword(salt, hash, password)
-{
-    var confirmHash = crypto.createHmac('sha512', salt);
-    confirmHash.update(password);
-
-    return (confirmHash.digest('base64') == hash);
+    else
+    {
+        next();
+    }
 }

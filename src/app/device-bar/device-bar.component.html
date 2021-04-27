@@ -1,0 +1,33 @@
+<div class="deviceBar">
+    <div class="barSegment">{{device.name}}</div>
+    <table class="barSegment">
+        <tr>
+            <td class="readingType">Temperature</td>
+            <td class="readingType">Humidity</td>
+            <td class="readingType">Light</td>
+        </tr>
+        <tr>
+            <td><app-data-view
+                    [value]="device.lastReading.temperatureF"
+                    [label]="' &deg;F'"
+                    [valueRange]="device.temperatureRange"></app-data-view>
+            </td>
+            <td><app-data-view
+                [value]="device.lastReading.humidity"
+                [label]="'% rH'"
+                [valueRange]="device.humidityRange"></app-data-view>
+            </td>
+            <td><app-data-view
+                [value]="device.lastReading.light"
+                [label]="'%'"
+                [valueRange]="device.lightRange"></app-data-view>
+            </td>
+        </tr>
+    </table>
+    <div class="barSegment timestamp">
+        Last update: <br/>
+        <app-timestamp [timeMs]="device.lastReading.timestamp"></app-timestamp>
+    </div>
+    <div class="barSegment"><input type="image" src="assets/gear.png" alt="Settings" class="button" (click)="openDeviceSettings()"/></div>
+    
+</div>

@@ -26,7 +26,19 @@ export class LoginPageComponent implements OnInit {
   ngOnInit() {
   }
 
-  attemptLogin(username: string, password: string)
+  submit()
+  {
+    if (this.newUser)
+    {
+      this.attemptNewUser();
+    }
+    else
+    {
+      this.attemptLogin();
+    }
+  }
+
+  attemptLogin()
   {
     var username: string = this.usernameField.nativeElement.value;
     var password: string = this.passwordField.nativeElement.value;
@@ -133,6 +145,9 @@ export class LoginPageComponent implements OnInit {
   {
     this.errorMessage = msg;
     this.showError = true;
+
+    this.passwordField.nativeElement.value = '';
+    this.confirmPasswordField.nativeElement.value = '';
   }
 
   hideErrorMessage()

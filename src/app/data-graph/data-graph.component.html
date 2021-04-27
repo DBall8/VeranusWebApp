@@ -1,0 +1,16 @@
+<h2 class="graphLabel"
+    [style.color]="color">{{title}}</h2>
+<div class="graphWrapper">
+    <canvas #graph>{{ chart }}</canvas>
+</div>
+<div class="dataRange">
+    <span id="showReadings">Show readings from:</span>
+    <select #range (change)="changeRange()">
+        <option value="1day">Past Day</option>
+        <option value="3day">Past 3 Days</option>
+        <option value="1week">Past Week</option>
+        <option value="1month">Past Month</option>
+        <option value="3month">Past 3 Months</option>
+        <option value="all" selected>All</option>
+    </select>
+</div>

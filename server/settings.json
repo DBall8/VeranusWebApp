@@ -1,5 +1,11 @@
 {
     "serverPort": 8002,
-    "serialPort": "COM6",
-    "baudRate": 9600
+    "serialPort": "COM13",
+    "baudRate": 9600,
+    "devices":
+        [
+            1,
+            2,
+            3
+        ]
 }

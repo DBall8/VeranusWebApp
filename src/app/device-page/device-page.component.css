@@ -1,0 +1,77 @@
+.dataItem
+{
+    font-size: 4em;
+}
+
+.centeredArea
+{
+    display: flex;
+    justify-content: center;
+}
+
+.dataLabel
+{
+    text-align: center;
+    font-size: 2em;
+}
+
+.graph
+{
+    margin: auto;
+}
+
+.pageArea
+{
+    background-color:  #553739;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    margin: auto;
+}
+
+.graphControl
+{
+    background-color: #955E42;
+    border: 2px solid black;
+    border-radius: 5px;
+    margin: 2px;
+}
+
+h2
+{
+    font-size: 3em;
+    padding: 10px;
+    margin: 0;
+}
+
+.back
+{
+    font-size: 1.4em;
+    text-decoration: none;
+    margin: 10px;
+    padding: 10px;
+    display: inline-block;
+}
+
+.graphButton
+{
+    cursor: pointer;
+}
+
+.thresholdTable
+{
+    background-color: #955E42;
+    border: 2px solid black;
+}
+
+.thresholdTable td, th
+{
+    padding: 20px 5px;
+    border: 1px solid black;
+}
+
+th
+{
+    font-weight: bold;
+    font-size: 1.2em;
+}

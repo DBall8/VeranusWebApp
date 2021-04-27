@@ -1,43 +1,33 @@
+<!-- Title and splash image -->
+<header><h1>Veranus</h1></header>
 <div class="loginWrapper">
-  <!-- Title and splash image -->
-  <div id="intro">
-    <h1>Veranus</h1>
-    <img src="https://www.zillarules.com/-/media/images/zilla-na/us/blog-articles/myths-facts-about-bearded-dragon-care/bearded-dragon.jpg?h=350&w=350&la=en&hash=BB45C333590D6C0AF6E426FC419D6A3B224212BE">
-  </div>
-
   <!-- Box for logging in or creating new account -->
   <div class="loginBox">
-    <!-- Toggle between log in or new account -->
-    <div class="toggle">
-      <span class="loginToggle"
-            (click)="newUser=false"
-            [style.background-color]="newUser ? '#553739' : '#955E42'">Log in</span>
-      <span 
-        class="loginToggle"
-        (click)="newUser=true"
-        [style.background-color]="newUser ? '#955E42' : '#553739'">New User</span>
-    </div><br>
+    <h2>{{newUser ? 'Create account' : 'Login'}}</h2>
 
-    <!-- Error message -->
-    <div class="errorBox"
-         [style.display]="showError ? 'block' : 'none'">
-      {{errorMessage}}
+    <div class="inputArea">
+        <!-- Error message -->
+        <div class="errorBox"
+            [style.display]="showError ? 'block' : 'none'">
+        {{errorMessage}}
+        </div>
+
+        <!-- Input fields -->
+        <label for="usernameInput">Username</label><br>
+        <input #Username id="usernameInput" class="textInput" (keyup.enter)="submit()"><br>
+        <label for="passwordInput">Password</label><br>
+        <input #Password id="passwordInput" type="password" class="textInput" (keyup.enter)="submit()"><br>
+
+        <!-- Confirm password field, only shown when creating new user -->
+        <div [style.display]="newUser ? 'block' : 'none'">
+        <label for="confirmPasswordInput">Confirm Password</label><br>
+        <input #ConfirmPassword id="confirmPasswordInput" type="password" class="textInput" (keyup.enter)="submit()"><br>
+        </div>
+
+        <!-- Submit buttons -->
+        <input class="submitButton button" type="button" value="Log In" (click)="attemptLogin()" [style.display]="newUser ? 'none' : 'block'">
+        <input class="submitButton button" type="button" value="Create User" (click)="attemptNewUser()" [style.display]="newUser ? 'block' : 'none'">
+        {{newUser ? 'Already have an account?' : 'New to ENotes?'}} <a href="/NO" (click)="$event.preventDefault(); newUser = !newUser">{{newUser ? 'Log in!' : 'Create an account!'}}</a>
     </div>
-
-    <!-- Input fields -->
-    <label for="usernameInput">Username</label><br>
-    <input #Username id="usernameInput"><br>
-    <label for="passwordInput">Password</label><br>
-    <input #Password id="passwordInput" type="password"><br>
-
-    <!-- Confirm password field, only shown when creating new user -->
-    <div [style.display]="newUser ? 'block' : 'none'">
-      <label for="confirmPasswordInput">Confirm Password</label><br>
-      <input #ConfirmPassword id="confirmPasswordInput" type="password"><br>
-    </div>
-
-    <!-- Submit buttons -->
-    <input class="submitButton" type="button" value="Log In" (click)="attemptLogin()" [style.display]="newUser ? 'none' : 'block'">
-    <input class="submitButton" type="button" value="Create User" (click)="attemptNewUser()" [style.display]="newUser ? 'block' : 'none'">
   </div>
 </div>

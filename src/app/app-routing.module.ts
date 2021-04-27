@@ -9,8 +9,8 @@ import { DeviceSettingsPageComponent } from './device-settings-page/device-setti
 const routes: Routes =
 [
   {path: 'login', component: LoginPageComponent},
-  {path: 'device', component: DevicePageComponent},
-  {path: 'settings', component: DeviceSettingsPageComponent},
+  {path: 'device/:deviceId', component: DevicePageComponent},
+  {path: 'settings/:deviceId', component: DeviceSettingsPageComponent},
   {path: '', component: MainPageComponent},
   {path: '', redirectTo: '/', pathMatch: 'prefix'},
 ];

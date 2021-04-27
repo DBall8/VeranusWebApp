@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router'
 
-import { Reading } from '../objects/reading'
+import { DeviceService } from '../services/device.service'
+import { Device } from '../objects/device'
 
 @Component({
   selector: 'app-main-page',
@@ -9,15 +11,50 @@ import { Reading } from '../objects/reading'
 })
 export class MainPageComponent implements OnInit {
 
-  readings: Reading[] =
-  [
-    new Reading(100, 80, 99, 100),
-    new Reading(101, 27, 9910, 234),
-  ];
+  @ViewChild('DeviceName', {static: false}) deviceNameField: ElementRef;
+  @ViewChild('DeviceId', {static: false})   deviceIdField: ElementRef;
 
-  constructor() { }
+  data: DeviceService;
+  showNewDevicePrompt: boolean;
 
-  ngOnInit() {
+  constructor(data: DeviceService, private router: Router)
+  {
+    this.data = data;
+    this.showNewDevicePrompt = false;
   }
 
+  ngOnInit() {
+    this.data.loadDevices();
+  }
+
+  toggleNewDevicePrompt()
+  {
+    this.showNewDevicePrompt = !this.showNewDevicePrompt;
+  }
+
+  addDevice()
+  {
+    var deviceName: string = this.deviceNameField.nativeElement.value;
+    var deviceId: string = this.deviceIdField.nativeElement.value;
+
+    if (!deviceName || !deviceId)
+    {
+      // Left a field blank, do nothing
+      return;
+    }
+
+    this.data.addDevice(deviceName, deviceId).subscribe((res) =>
+    {
+      if (res.body && res.body.success)
+      {
+        this.showNewDevicePrompt = false;
+        this.data.loadDevice(deviceId, deviceName);
+      }
+    })
+  }
+
+  openDevice(device: Device)
+  {
+    this.router.navigate(['/device', device.id]);
+  }
 }

@@ -1,1 +1,61 @@
-<p>device-settings-page works!</p>
+<!-- Header -->
+<a href="/logout" class="logout button">Logout</a><br>
+<header><h1>Veranus</h1></header>
+
+<!-- Main page body -->
+<div class="pageArea">
+    <!-- Back button -->
+    <a href="/" class="back button">Back</a>
+
+    <!-- Device title -->
+    <h2 class="centeredArea">{{device.name}}</h2>
+    <br>
+
+    <!-- Device settings -->
+    <div class="pageSection">
+        <h2>Device settings:</h2>
+        <h3>Warning and Danger Thresholds</h3>
+        <p>Set the measurements at which we turn the reading from green to yellow to indicate the
+            measurement is near a dangerous level, and when it turns from yellow to red indicating
+            it is at a dangerous level.</p>
+        <table class="thresholdTable">
+            <tr>
+                <th class="topRow"></th> <th class="warningText topRow">Warning</th> <th class="dangerText topRow">Danger</th>
+            </tr>
+            <tr>
+                <th>Temperature</th>
+                <td class="thresholdInputCell">
+                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.warningLow">&deg;F<br>
+                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.warningHigh">&deg;F</td>
+                <td class="thresholdInputCell">
+                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.dangerLow">&deg;F<br>
+                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.dangerHigh">&deg;F</td>
+            </tr>
+            <tr>
+                <th>Humidity</th>
+                <td class="thresholdInputCell">
+                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.warningLow">%<br>
+                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.warningHigh">%</td>
+                <td class="thresholdInputCell">
+                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.dangerLow">%<br>
+                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.dangerHigh">%</td>
+            </tr>
+            <tr>
+                <th>Light</th>
+                <td class="thresholdInputCell">
+                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.warningLow">%<br>
+                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.warningHigh">%</td>
+                <td class="thresholdInputCell">
+                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.dangerLow">%<br>
+                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.dangerHigh">%</td>
+            </tr>
+        </table>
+        <input type="button" class="button saveSettingsButton" value="Save Settings" (click)="saveRanges()">
+
+    </div>
+    <div class="pageSection">
+        <h3>Delete this device</h3>
+        <p>WARNING this will permanently delete all recorded readings from this device</p>
+        <input type="button" class="button deleteDeviceButton" value="Delete Device" (click)="deleteDevice()">
+    </div>
+</div>

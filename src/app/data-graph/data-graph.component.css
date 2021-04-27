@@ -1,0 +1,18 @@
+.graphLabel{
+    text-align: center;
+    margin-top: 50px;
+}
+.graphWrapper{
+    margin: auto;
+    width: 80%;
+}
+
+.dataRange{
+    text-align: center;
+    margin: 10px;
+}
+
+#showReadings{
+    font-weight: bold;
+    margin: 5px;
+}

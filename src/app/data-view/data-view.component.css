@@ -1,0 +1,13 @@
+.valueBox
+{
+    display: inline-block;
+
+    border: 2px solid black;
+    border-radius: 5px;
+    font-weight: bold;
+
+    padding: 5px;
+    margin: 5px;
+
+    background-color: green;
+}

@@ -1,8 +1,37 @@
 <div class="pageWrapper">
     <div>
-        <h1>Veranus</h1><br>
+        <!-- <h1>Veranus</h1><br> -->
+        <a href="/logout" class="logout button">Logout</a>
+        <header><h1>Veranus</h1></header>
         <div class="deviceListWrapper">
-            test
+
+            <!-- List of devices for this user -->
+            <div *ngFor="let device of this.data.devices">
+                <app-device-bar [device]="device"
+                                (click)="openDevice(device)"></app-device-bar>
+            </div>
+
+            <!-- Button bar is a bar for adding new devices -->
+            <div id="newDeviceBar" class="deviceBar">
+                <!-- Toggle button for showing/hiding new device prompt -->
+                <div (click)="toggleNewDevicePrompt()">+</div>
+
+                <!-- New device prompt -->
+                <div id="newDevicePrompt" [style.display]="showNewDevicePrompt ? 'block' : 'none'">
+                    <table>
+                        <tr>
+                            <td><label for="deviceNameInput">Device Name: </label></td>
+                            <td><input #DeviceName id="deviceNameInput" class="textInput" type="text" /><br></td>
+                        </tr>
+                        <tr>
+                            <td><label for="deviceIdInput">Device ID: </label></td>
+                            <td><input #DeviceId id="deviceIdInput" class="textInput" type="text" />   </td>
+                        </tr>
+                    </table>
+                    <input type="button" class="button" value="Add Device" (click)="addDevice()">
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
