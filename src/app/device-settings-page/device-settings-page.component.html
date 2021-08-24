@@ -1,6 +1,6 @@
 <!-- Header -->
-<a href="/logout" class="logout button">Logout</a><br>
-<header><h1>Veranus</h1></header>
+
+<header><img src="assets/Veranus_name.png" alt="Veranus" width="25%"><a href="/logout" class="logout button">Logout</a></header>
 
 <!-- Main page body -->
 <div class="pageArea">
@@ -8,12 +8,21 @@
     <a href="/" class="back button">Back</a>
 
     <!-- Device title -->
-    <h2 class="centeredArea">{{device.name}}</h2>
+    <div class="centeredArea">
+        <h2 class="centeredArea">{{device.name}}</h2>
+        <img src="{{ 'images/' + this.device.id}}" class="deviceImage" alt="" style="height: auto;"><br>
+    </div>
     <br>
 
     <!-- Device settings -->
     <div class="pageSection">
         <h2>Device settings:</h2>
+        <h3>Upload Image</h3>
+        <p>Upload an image for this device.</p>
+        <input type="file"  #UploadFile accept="image/x-png,image/gif,image/jpeg"><br>
+        <input type="button" class="button" value="Upload Image" (click)="uploadImage()">
+        <input type="button" class="button deleteButton" value="Remove Image" (click)="removeImage()">
+
         <h3>Warning and Danger Thresholds</h3>
         <p>Set the measurements at which we turn the reading from green to yellow to indicate the
             measurement is near a dangerous level, and when it turns from yellow to red indicating
@@ -50,12 +59,12 @@
                     Above: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.dangerHigh">%</td>
             </tr>
         </table>
-        <input type="button" class="button saveSettingsButton" value="Save Settings" (click)="saveRanges()">
+        <input type="button" class="button largeSettingsButton" value="Save Settings" (click)="saveRanges()">
 
     </div>
     <div class="pageSection">
         <h3>Delete this device</h3>
         <p>WARNING this will permanently delete all recorded readings from this device</p>
-        <input type="button" class="button deleteDeviceButton" value="Delete Device" (click)="deleteDevice()">
+        <input type="button" class="button largeSettingsButton deleteButton" value="Delete Device" (click)="deleteDevice()">
     </div>
 </div>

@@ -1,29 +1,26 @@
 <div class="deviceBar">
     <div class="barSegment">{{device.name}}</div>
-    <table class="barSegment">
-        <tr>
-            <td class="readingType">Temperature</td>
-            <td class="readingType">Humidity</td>
-            <td class="readingType">Light</td>
-        </tr>
-        <tr>
-            <td><app-data-view
-                    [value]="device.lastReading.temperatureF"
-                    [label]="' &deg;F'"
-                    [valueRange]="device.temperatureRange"></app-data-view>
-            </td>
-            <td><app-data-view
-                [value]="device.lastReading.humidity"
-                [label]="'% rH'"
-                [valueRange]="device.humidityRange"></app-data-view>
-            </td>
-            <td><app-data-view
+    <div class="barSegment">
+        <div class="readingType">Temperature</div>
+        <app-data-view
+            [value]="device.lastReading.temperatureF"
+            [label]="' &deg;F'"
+            [valueRange]="device.temperatureRange"></app-data-view>
+    </div>
+    <div class="barSegment">
+        <div class="readingType">Humidity</div>
+        <app-data-view
+            [value]="device.lastReading.humidity"
+            [label]="'% rH'"
+            [valueRange]="device.humidityRange"></app-data-view>
+    </div>
+    <div class="barSegment">
+        <div class="readingType">Light</div>
+        <app-data-view
                 [value]="device.lastReading.light"
                 [label]="'%'"
                 [valueRange]="device.lightRange"></app-data-view>
-            </td>
-        </tr>
-    </table>
+    </div>
     <div class="barSegment timestamp">
         Last update: <br/>
         <app-timestamp [timeMs]="device.lastReading.timestamp"></app-timestamp>

@@ -69,7 +69,6 @@ input {
   font-size: 2.5em;
   margin: 15px;
   padding: 10px;
-  width: 80%;
 }
 
 .toggle {
@@ -110,4 +109,9 @@ span.loginToggle:hover
 
 a{
     color:#dc9a4a;
+}
+
+.textInput
+{
+    width: 90%;
 }

@@ -3,8 +3,13 @@
 <div class="graphWrapper">
     <canvas #graph>{{ chart }}</canvas>
 </div>
-<div class="dataRange">
-    <span id="showReadings">Show readings from:</span>
+<div class="graphOptions">
+    <!-- Option to scale graph -->
+    <label for="scaleOption" class="graphOptionText" >Scale</label>
+    <input #scaleOption type="checkbox" (change)="changeScale()">
+
+    <!-- Option time period of readings -->
+    <span class="graphOptionText">Show readings from:</span>
     <select #range (change)="changeRange()">
         <option value="1day">Past Day</option>
         <option value="3day">Past 3 Days</option>

@@ -9,7 +9,8 @@ import { Reading } from '../objects/reading'
 import { ValueRange } from '../objects/valueRange'
 
 const debug = false;
-const socketUrl = "https://veranus.site"
+const socketUrl = debug ? "http://localhost:8002" : "https://veranus.site";
+const socketSecure: boolean = !debug;
 
 @Injectable({
   providedIn: 'root'
@@ -300,13 +301,69 @@ export class DeviceService {
     )
   }
 
+    readFile(file: File): Promise<any>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            var reader: FileReader = new FileReader();
+
+            reader.addEventListener('load', (event) =>
+            {
+                resolve(event['target']['result']);
+            })
+
+            reader.readAsText(file);
+        });
+    }
+
+    saveImage(deviceId: string, imageFile: ArrayBuffer, type: string): Observable<any>
+    {
+        var data1: Uint8Array = new Uint8Array(imageFile);
+
+        var data2 = [];
+        for (var i=0; i<data1.byteLength; i++)
+        {
+            data2.push(data1[i]);
+        }
+        
+
+        return this.http.request(
+            "POST",
+            "/image",
+            {
+                observe: "response",
+                body:
+                {
+                    deviceId: deviceId,
+                    file: data2,
+                    type: type
+                }
+            }
+        );
+    }
+
+    deleteImage(deviceId: string): Observable<any>
+    {
+        return this.http.request(
+            "DELETE",
+            "/image",
+            {
+                observe: "response",
+                body:
+                {
+                    deviceId: deviceId,
+                }
+            }
+        );
+    }
+
   startSocket()
   {
     if (this.socketConn)
     {
       this.socketConn.disconnect();
     }
-    this.socketConn = io(socketUrl, {secure: true});
+    this.socketConn = io(socketUrl, {secure: socketSecure});
 
     this.socketConn.on("reading", (update) =>
     {
@@ -331,6 +388,17 @@ export class DeviceService {
         }
       }
     })
+
+    this.socketConn.on("connect", () =>
+    {
+        if (this.devices)
+        {
+            for (var i=0; i<this.devices.length; i++)
+            {
+                this.socketConn.emit("device", this.devices[i].id);
+            }
+        }
+    });
   }
 
   isSessionExpired(response: any): boolean

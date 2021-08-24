@@ -11,6 +11,8 @@ const DAY_GRAPH_LABEL: string = "hA";
 
 const DEFAULT_UNIT = "hour";
 const MONTH_UNIT = "day";
+const SCALE_MIN = 0;
+const SCALE_MAX = 100;
 
 @Component({
   selector: 'app-data-graph',
@@ -28,6 +30,7 @@ export class DataGraphComponent implements OnInit {
 
   @ViewChild('graph', {static: true}) private graphElement;
   @ViewChild('range', {static: true}) private rangeElement;
+  @ViewChild('scaleOption', {static: true}) private scaleElement;
 
   // Graph
   chart: any;
@@ -82,8 +85,8 @@ export class DataGraphComponent implements OnInit {
                   ticks: {
                       fontColor: "black",
                       fontSize: 18,
-                      suggestedMin: 0,
-                      suggestedMax: 100
+                      suggestedMin: SCALE_MIN,
+                      suggestedMax: SCALE_MAX
                   },
               }]
           }
@@ -175,6 +178,23 @@ export class DataGraphComponent implements OnInit {
 
         this.dateRange = date.getTime();
         this.updateChart();
+    }
+
+    changeScale()
+    {
+        if (this.scaleElement.nativeElement.checked)
+        {
+            delete this.chartOptions.options.scales.yAxes[0].ticks.suggestedMin;
+            delete this.chartOptions.options.scales.yAxes[0].ticks.suggestedMax;
+        }
+        else
+        {
+            this.chartOptions.options.scales.yAxes[0].ticks.suggestedMin = SCALE_MIN;
+            this.chartOptions.options.scales.yAxes[0].ticks.suggestedMax = SCALE_MAX;
+        }
+
+        this.updateChart();
+        
     }
 
 }

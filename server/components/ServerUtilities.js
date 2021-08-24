@@ -5,7 +5,7 @@ function sendFile(res, filename, type)
     type = type || 'text/html'
     fs.readFile(filename, function (error, content) {
         if (error) {
-            console.log(error);
+            console.log("error");
         }
         res.writeHead(200, { 'Content-type': type });
         res.end(content, 'utf-8');

@@ -1,87 +1,87 @@
 <!-- Header -->
 <a href="/logout" class="logout button">Logout</a><br>
-<header><h1>Veranus</h1></header>
+<header><img src="assets/Veranus_name.png" alt="Veranus" width="25%"></header>
 
 <!-- Main page body -->
 <div class="pageArea">
     <!-- Back button -->
-    <a href="/" class="back button">Back</a>
-
-    <!-- Device title -->
-    <h2 class="centeredArea">{{device.name}}</h2>
-    <br>
-
-    <!-- Latest readings -->
+    <a href="/" class="back button">Back</a><br>
     <div class="centeredArea">
-        <table>
-            <tr>
-                <td class="dataLabel">Temperature</td>
-                <td class="dataLabel">Humidity</td>
-                <td class="dataLabel">Light</td>
-            </tr>
-            <tr>
-                <td><app-data-view
+        <!-- Device title -->
+        <h2 class="centeredArea">{{device.name}}</h2>
+
+        <!-- Device image -->
+        <img src="{{ 'images/' + this.device.id}}" class="deviceImage" alt="">
+
+        <!-- Latest readings -->
+        <div>
+            <div class="readingDiv">
+                <div class="dataLabel">Temperature</div>
+                <app-data-view
                     class="dataItem"
                     [value]="device.lastReading.temperatureF"
                     [label]="' &deg;F'"
-                    [valueRange]="device.temperatureRange">
-                </app-data-view></td>
-                <td><app-data-view
+                    [valueRange]="device.temperatureRange"></app-data-view>
+            </div>
+            <div class="readingDiv">
+                <div class="dataLabel">Humidity</div>
+                <app-data-view
                     class="dataItem"
                     [value]="device.lastReading.humidity"
                     [label]="'% rH'"
-                    [valueRange]="device.humidityRange">
-                </app-data-view></td>
-                <td><app-data-view
+                    [valueRange]="device.humidityRange"></app-data-view>
+            </div>
+            <div class="readingDiv">
+                <div class="dataLabel">Light</div>
+                <app-data-view
                     class="dataItem"
                     [value]="device.lastReading.light"
                     [label]="'%'"
-                    [valueRange]="device.lightRange">
-                </app-data-view></td>
-            </tr>
-        </table>
-    </div>
-    <div class="centeredArea">Last Updated: <app-timestamp [style.padding-left]="'5px'" [timeMs]="device.lastReading.timestamp"></app-timestamp></div>
-    <br>
+                    [valueRange]="device.lightRange"></app-data-view>
+            </div>
+        </div><br>
+        <div class="centeredArea">Last Updated: <app-timestamp [style.padding-left]="'5px'" [timeMs]="device.lastReading.timestamp"></app-timestamp></div>
+        <br>
 
-    <!-- Graph of data over time -->
-    <div class="graphControl">
-        <div class="graphButton button" (click)="showTempGraph = !showTempGraph;">{{showTempGraph? 'Hide' : 'Show'}} Temperature Graph</div>
-        <div [style.display]="showTempGraph ? 'block' : 'none'">
-        <app-data-graph
-            class="graph"
-            [title]="'Temperature (&deg;F)'"
-            [data]="readings"
-            [value]="'temperature'"
-            [color]="'#232020'"
-            [update]="update">
-        </app-data-graph>
+        <!-- Graph of data over time -->
+        <div class="graphControl">
+            <div class="graphButton button" (click)="showTempGraph = !showTempGraph;">{{showTempGraph? 'Hide' : 'Show'}} Temperature Graph</div>
+            <div [style.display]="showTempGraph ? 'block' : 'none'">
+            <app-data-graph
+                class="graph"
+                [title]="'Temperature (&deg;F)'"
+                [data]="readings"
+                [value]="'temperature'"
+                [color]="'#232020'"
+                [update]="update">
+            </app-data-graph>
+            </div>
         </div>
-    </div>
-    <div class="graphControl">
-        <div class="graphButton button" (click)="showHumidityGraph = !showHumidityGraph;">{{showHumidityGraph? 'Hide' : 'Show'}} Humidity Graph</div>
-        <div [style.display]="showHumidityGraph ? 'block' : 'none'">
-        <app-data-graph
-            class="graph"
-            [title]="'Relative Humidity (%)'"
-            [data]="readings"
-            [value]="'humidity'"
-            [color]="'#232020'"
-            [update]="update">
-        </app-data-graph>
+        <div class="graphControl">
+            <div class="graphButton button" (click)="showHumidityGraph = !showHumidityGraph;">{{showHumidityGraph? 'Hide' : 'Show'}} Humidity Graph</div>
+            <div [style.display]="showHumidityGraph ? 'block' : 'none'">
+            <app-data-graph
+                class="graph"
+                [title]="'Relative Humidity (%)'"
+                [data]="readings"
+                [value]="'humidity'"
+                [color]="'#232020'"
+                [update]="update">
+            </app-data-graph>
+            </div>
         </div>
-    </div>
-    <div class="graphControl">
-        <div class="graphButton button" (click)="showLightGraph = !showLightGraph;">{{showLightGraph? 'Hide' : 'Show'}} Light Graph</div>
-        <div [style.display]="showLightGraph ? 'block' : 'none'">
-        <app-data-graph
-            class="graph"
-            [title]="'Ambient Light (%)'"
-            [data]="readings"
-            [value]="'light'"
-            [color]="'#232020'"
-            [update]="update">
-        </app-data-graph>
+        <div class="graphControl">
+            <div class="graphButton button" (click)="showLightGraph = !showLightGraph;">{{showLightGraph? 'Hide' : 'Show'}} Light Graph</div>
+            <div [style.display]="showLightGraph ? 'block' : 'none'">
+            <app-data-graph
+                class="graph"
+                [title]="'Ambient Light (%)'"
+                [data]="readings"
+                [value]="'light'"
+                [color]="'#232020'"
+                [update]="update">
+            </app-data-graph>
+            </div>
         </div>
     </div>
 </div>

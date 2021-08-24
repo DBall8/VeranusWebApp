@@ -5,8 +5,7 @@
 
 .centeredArea
 {
-    display: flex;
-    justify-content: center;
+    text-align: center;
 }
 
 .dataLabel
@@ -34,7 +33,7 @@
     background-color: #955E42;
     border: 2px solid black;
     border-radius: 5px;
-    margin: 2px;
+    margin: 10px;
 }
 
 h2
@@ -56,22 +55,14 @@ h2
 .graphButton
 {
     cursor: pointer;
-}
-
-.thresholdTable
-{
-    background-color: #955E42;
-    border: 2px solid black;
-}
-
-.thresholdTable td, th
-{
-    padding: 20px 5px;
-    border: 1px solid black;
-}
-
-th
-{
-    font-weight: bold;
     font-size: 1.2em;
+}
+
+.readingDiv
+{
+    display: inline-block;
+    vertical-align: middle;
+
+    margin: 10px;
+    font-weight: bold;
 }

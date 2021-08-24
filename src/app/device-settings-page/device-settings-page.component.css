@@ -1,7 +1,6 @@
 .centeredArea
 {
-    display: flex;
-    justify-content: center;
+    text-align: center;
 }
 
 .pageArea
@@ -90,21 +89,20 @@ th
     text-align: right;
 }
 
-.saveSettingsButton
+.largeSettingsButton
 {
     font-size: 1.5em;
 }
 
-.deleteDeviceButton
+.deleteButton
 {
-    font-size: 1.5em;
     background-color: indianred;
 }
 
-  .deleteDeviceButton:hover {
+  .deleteButton:hover {
     background-color: #dc7070;
   }
   
-  .deleteDeviceButton:focus{
+  .deleteButton:focus{
     background-color: #b82a2a;;
   }

@@ -17,6 +17,7 @@ function addConnection(conn)
         devices: []
     }
 
+    console.log("Socket " + conn.id + " has connected");
     activeConnections.push(newConn);
 }
 
@@ -26,6 +27,7 @@ function removeConnection(connId)
     {
         if (activeConnections[i].conn.id === connId)
         {
+            console.log("Socket " + connId + " has disconnected");
             activeConnections.splice(i, 1);
             return;
         }

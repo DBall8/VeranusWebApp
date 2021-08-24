@@ -4,7 +4,6 @@ var express = require('express'),
     url = require('url'),
     sessions = require('client-sessions'),
     db = require('./components/db-sqlite'),
-    serial = require('./components/SerialReader'),
     utilities = require('./components/ServerUtilities'),
     userManager = require('./components/UserManager'),
     deviceManager = require('./components/DeviceManager'),
@@ -16,7 +15,6 @@ const SETTINGS = require(__dirname + "/settings.json");
 const app = createApp();
 const server = startServer(app);
 startDatabase();
-startSerial();
 socketControl.startSocket(server);
 
 function createApp()
@@ -75,7 +73,30 @@ function createApp()
     app.get('/ranges', requireLogin, deviceManager.getRanges);        // Get the ranges for readings for a device
     app.post('/ranges', requireLogin, deviceManager.updateRanges);    // Update the ranges for a device
 
-    app.get('/update-sensor', () => console.log("RECEIVED UPDATE"));
+    // Receive updates from probes at this URL
+    app.post('/update-sensor', (req, res) => 
+    {
+        // Take reading, store it, and emit it
+        var json = JSON.parse(req.body);
+        var hardwareId = json.probeId.toString();
+        var data = 
+        {
+            temperature: json.temperatureF,
+            humidity: json.humidity,
+            light: json.light,
+            timestamp: new Date().getTime()
+        };
+        deviceManager.addReading(hardwareId, data);
+        socketControl.sendReading(hardwareId, data);
+
+        res.end(JSON.stringify({success: true}));
+    });
+
+    app.post('/image', deviceManager.updateImage);
+
+    app.get('/images/*', deviceManager.getImage);
+
+    app.delete('/image', deviceManager.removeImage);
 
     // Direct all other requests to file requests
     app.all('*', (req, res, next) =>
@@ -88,7 +109,7 @@ function createApp()
         var split = uri.pathname.split('.');
         var fileType = split[split.length - 1];
 
-        if (fileType === "jpg") fileType = "image/png";
+        if (fileType === "jpg") fileType = "image/jpg";
         else if (fileType === "js") fileType = "text/javascript";
         else fileType = "text/" + fileType;
     
@@ -134,20 +155,6 @@ function startDatabase()
             console.log("DB connection FAILED");
             console.log(err);
         });
-}
-
-function startSerial()
-{
-    // Start serial driver to probe devices for readings
-    var devices = SETTINGS.devices;
-    serial.start(SETTINGS.serialPort, SETTINGS.baudRate, devices, devices.length);
-    serial.dataReceivedEvent.on("data", (data) =>
-    {
-        var hardwareId = data.probeId.toString();
-        delete data.probeId;
-        deviceManager.addReading(hardwareId, data);
-        socketControl.sendReading(hardwareId, data);
-    });
 }
 
 function requireLogin(req, res, next)
