@@ -25,7 +25,7 @@ function addDevice(req, res)
     {
         // Failed to include required information
         console.log("ERROR: Invalid new device request");
-        server.sendError(res);
+        server.sendInputError(res);
         return;
     }
 
@@ -79,6 +79,11 @@ function getDevices(req, res)
             console.log(err);
             server.sendInternalError(res);
         });
+}
+
+function getDeviceOwner(deviceId)
+{
+    return db.getDeviceOwner(deviceId);
 }
 
 function deleteDevice(req, res)
@@ -521,6 +526,7 @@ function removeImage(req, res)
 
 exports.addDevice = addDevice;
 exports.getDevices = getDevices;
+exports.getDeviceOwner = getDeviceOwner;
 exports.deleteDevice = deleteDevice;
 exports.addReading = addReading;
 exports.getReadings = getReadings;

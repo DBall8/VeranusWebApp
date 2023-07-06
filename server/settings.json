@@ -1,3 +1,10 @@
 {
-    "serverPort": 8002
+    "serverPort": 8002,
+    "SUPER_USER": "Damon",
+    "CAVYCAM_URL": "http://192.168.0.31/",
+    "FEEDER_CMD_TIMEOUT_MS": 30000,
+    "HOPPER_HEARTBEAT_MS": 1800000,
+    "HOPPER_TIMEOUT_MS": 120000,
+    "READINGS_PER_DEVICE": 70080,
+    "DEVICE_TIMEOUT_MS": 3000000
 }

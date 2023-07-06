@@ -7,7 +7,10 @@ var express = require('express'),
     utilities = require('./components/ServerUtilities'),
     userManager = require('./components/UserManager'),
     deviceManager = require('./components/DeviceManager'),
-    socketControl = require('./components/SocketControl')
+    feederManager = require('./components/FeederManager'),
+    socketControl = require('./components/SocketControl'),
+    cavyCam = require('./components/CavyCam'),
+    notificationManager = require('./components/NotificationManager')
 
 // Configuration settings
 const SETTINGS = require(__dirname + "/settings.json");
@@ -16,6 +19,7 @@ const app = createApp();
 const server = startServer(app);
 startDatabase();
 socketControl.startSocket(server);
+feederManager.initFeederControl(server);
 
 function createApp()
 {
@@ -57,9 +61,10 @@ function createApp()
     });
 
     // Handle user account requests
-    app.post('/login', userManager.attemptLogin);       // Existing user login attempt
-    app.post('/newuser', userManager.attemptNewUser);   // Create new user attempt
-    app.get('/logout', userManager.logout);             // Log out user session
+    app.post('/login', userManager.attemptLogin);                   // Existing user login attempt
+    app.post('/newuser', userManager.attemptNewUser);               // Create new user attempt
+    app.get('/logout', userManager.logout);                         // Log out user session
+    app.post('/token', requireLogin, userManager.updateUserToken); // Update a firebase token for this user
 
     // Handle device requests
     app.get('/device', requireLogin, deviceManager.getDevices);       // Get list of devices for a user
@@ -68,33 +73,39 @@ function createApp()
 
     // Handle readings requests
     app.get('/readings', requireLogin, deviceManager.getReadings);    // Get list of a device's latest readings
+    app.post('/update-sensor', handleNewReading);                     // Receive updates from probes at this URL
 
     // Handle range requests
     app.get('/ranges', requireLogin, deviceManager.getRanges);        // Get the ranges for readings for a device
     app.post('/ranges', requireLogin, deviceManager.updateRanges);    // Update the ranges for a device
 
-    // Receive updates from probes at this URL
-    app.post('/update-sensor', (req, res) => 
-    {
-        // Take reading, store it, and emit it
-        var json = JSON.parse(req.body);
-        var hardwareId = json.probeId.toString();
-        var data = 
-        {
-            temperature: json.temperatureF,
-            humidity: json.humidity,
-            light: json.light,
-            timestamp: new Date().getTime()
-        };
-        deviceManager.addReading(hardwareId, data);
-        socketControl.sendReading(hardwareId, data);
+    // Handle feeder requests
+    app.get('/feeders', requireLogin, feederManager.getFeeders);    // Get the list of feeders for this user
+    app.put('/feeder', requireLogin, feederManager.addFeeder);      // Add a new feeder for this user
+    app.get('/feeder', requireLogin, feederManager.getFeederStatus);// Get the Open/closed status of a feeder
+    app.post('/feeder', requireLogin, feederManager.controlFeeder); // Open or close a feeder
+    app.delete('/feeder', requireLogin, feederManager.deleteFeeder);// Delete a feeder
 
-        res.end(JSON.stringify({success: true}));
+    // Cavy cam functions
+    app.get('/capture', cavyCam.handleCapture);
+
+    app.get('/test', (req, res) =>
+    {
+        var response =
+        {
+            timestamp: new Date().getTime(),
+            success: true
+        };
+
+        res.writeHead(200);
+        res.end(JSON.stringify(response));
     });
 
     app.post('/image', deviceManager.updateImage);
 
     app.get('/images/*', deviceManager.getImage);
+
+    app.get('/captures/*', (req, res) => utilities.sendFile(res, __dirname + '/../captures/image1.jpg'));
 
     app.delete('/image', deviceManager.removeImage);
 
@@ -167,4 +178,29 @@ function requireLogin(req, res, next)
     {
         next();
     }
+}
+
+function handleNewReading(req, res)
+{
+    // Parse reading
+    var json = JSON.parse(req.body);
+    var hardwareId = json.probeId.toString();
+    var data = 
+    {
+        temperature: json.temperatureF,
+        humidity: json.humidity,
+        light: json.light,
+        timestamp: new Date().getTime()
+    };
+
+    // Store reading
+    deviceManager.addReading(hardwareId, data);
+
+    // Send new reading
+    socketControl.sendReading(hardwareId, data);
+
+    // Send push notification
+    notificationManager.handleReadings(hardwareId, data);
+
+    res.end(JSON.stringify({success: true}));
 }

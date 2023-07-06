@@ -46,6 +46,12 @@ export class DataGraphComponent implements OnInit {
    }
 
   ngOnInit() {
+
+      // Initialize to Past Day
+      var date: Date = new Date(Date.now());
+      date.setDate(date.getDate() - 1);
+      this.dateRange = date.getTime();
+      
       this.chartOptions = 
       {
         type: 'line',
@@ -54,8 +60,8 @@ export class DataGraphComponent implements OnInit {
           [
             {
               label: this.title,
-              backgroundColor: this.color,
-              borderColor: this.color,
+              backgroundColor: '#232020',
+              borderColor: 'black',
               data: this.displayedData,
             }
           ]
@@ -71,11 +77,11 @@ export class DataGraphComponent implements OnInit {
                   type: 'time',
                   time:
                   {
-                      unit: MONTH_UNIT,
-                      unitStepSize: MONTH_STEP_SIZE,
+                      unit: DEFAULT_UNIT,
+                      unitStepSize: DAY_STEP_SIZE,
                       displayFormats:
                       {
-                          hour: DEFAULT_GRAPH_LABEL,
+                          hour: DAY_GRAPH_LABEL,
                           day: "MMM D"
                       },
                   },

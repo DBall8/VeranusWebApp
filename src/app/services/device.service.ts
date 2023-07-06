@@ -411,4 +411,16 @@ export class DeviceService {
 
     return false;
   }
+
+  // Cavy Cam prototyping
+  capture()
+  {
+    return this.http.request(
+      "GET",
+      '/capture',
+      {
+        observe: "response"
+      }
+    );
+  }
 }

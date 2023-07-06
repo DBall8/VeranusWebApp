@@ -2,8 +2,10 @@ const { resolve } = require('path');
 var sqlite = require('sqlite3'),
     path = require('path')
 
+// Configuration settings
+const SETTINGS = require(__dirname + "/../settings.json");
+
 const dbPath = path.resolve(__dirname + '../../../db/veranus.db');
-const MAX_READINGS_PER_DEVICE = 1000;
 
 const DEFAULT_DANGER_LOW = 0;
 const DEFAULT_DANGER_HIGH = 100;
@@ -20,6 +22,7 @@ var db;
  *      name: Text (Unique)
  *      salt: Text
  *      hash: Text
+ *      token: Text
  * 
  * Devices Table:
  *      id: Text (Primary key)
@@ -42,6 +45,11 @@ var db;
  *      dangerHigh: Real
  *      warningLow: Real
  *      warningHigh: Real
+ * 
+ * Feeders Table
+ *      id: Integer (Primary key)
+ *      name: Text
+ *      ownerId: Integer (Foreign key => users.id)
  */
 function createTables()
 {
@@ -49,7 +57,8 @@ function createTables()
            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
            "name TEXT UNIQUE," +
            "salt TEXT," +
-           "hash TEXT);",
+           "hash TEXT," +
+           "token TEXT);",
            (err) =>
         {
             if (err)
@@ -106,6 +115,20 @@ function createTables()
          if (err)
          {
              console.log("Failed to create RANGES table")
+             console.log(err);
+         }
+     })
+
+     db.run("CREATE TABLE IF NOT EXISTS feeders (" +
+        "id INTEGER PRIMARY KEY," +
+        "name TEXT," +
+        "ownerId INTEGER," +
+        "FOREIGN KEY (ownerId) REFERENCES users (id));",
+        (err) =>
+     {
+         if (err)
+         {
+             console.log("Failed to create FEEDERS table")
              console.log(err);
          }
      })
@@ -213,7 +236,7 @@ function addReading(deviceId, temperature, humidity, light, timestamp)
 
             var count = result['COUNT(*)'];
 
-            if (count >= MAX_READINGS_PER_DEVICE)
+            if (count >= SETTINGS.READINGS_PER_DEVICE)
             {
                 // Readings at capacity, overwrite the oldest reading
                 // First, get the oldest reading
@@ -294,6 +317,24 @@ async function createRanges()
 
 }
 
+function addFeeder(id, name, ownerId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.run(`INSERT INTO feeders (id, name, ownerId) VALUES ('${id}', '${name}', '${ownerId}');`,
+            function(err)
+            {
+                if (err)
+                {
+                    reject(err);
+                    return;
+                }
+                resolve(true);
+            }
+        );
+    });
+}
+
 /**
  * Retrieve
  */
@@ -313,6 +354,41 @@ function getUser(username)
                 resolve(user);
             })
     })
+}
+
+function getUserFromId(userId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.get(`SELECT * FROM users WHERE id = '${userId}';`,
+            (err, user) =>
+            {
+                if (err)
+                {
+                    reject(err);
+                    return;
+                }
+
+                resolve(user);
+            })
+    })
+}
+
+function getDevice(deviceId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.get(`SELECT * FROM devices WHERE id = ${deviceId};`,
+            (err, device) =>
+            {
+                if (err)
+                {
+                    reject(err);
+                    return;
+                }
+                resolve(device);
+            })
+    });
 }
 
 function getDevices(userId)
@@ -361,7 +437,7 @@ function getReadings(deviceId, numReadings)
 {
     return new Promise((resolve, reject) =>
     {
-        db.all(`SELECT * FROM readings WHERE deviceId='${deviceId}' ORDER BY timestamp;`,
+        db.all(`SELECT * FROM readings WHERE deviceId='${deviceId}' ORDER BY timestamp DESC LIMIT ${numReadings};`,
             (err, rows) =>
             {
                 if (err)
@@ -369,8 +445,7 @@ function getReadings(deviceId, numReadings)
                     reject(err);
                     return;
                 }
-
-                resolve(rows.slice(numReadings * -1));
+                resolve(rows);
             })
     })
 }
@@ -443,6 +518,41 @@ async function getRanges(deviceId)
     });
 }
 
+function getFeeders(userId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.all(`SELECT id, name FROM feeders WHERE ownerId = ${userId};`,
+            (err, rows) =>
+            {
+                if (err)
+                {
+                    reject(err);
+                    return;
+                }
+
+                resolve(rows);
+            })
+    })
+}
+
+async function getFeederOwner(id)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.get(`SELECT ownerId FROM feeders WHERE id='${id}';`,
+            (err, ownerId) =>
+            {
+                if (err)
+                {
+                    reject(err);
+                    return;
+                }
+                resolve(ownerId);
+            })
+    })
+}
+
 /**
  * Modify
  */
@@ -504,6 +614,24 @@ function updateRanges(deviceId, temperatureRange, humidityRange, lightRange)
                     resolve();
                 }).catch((err) => reject(err));
             });
+    })
+}
+
+function updateToken(userId, newToken)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.run(`UPDATE users SET token='${newToken}' WHERE id=${userId};`,
+            (err) =>
+            {
+                if (err)
+                {
+                    reject(err);
+                    return;
+                }
+
+                resolve();
+            })
     })
 }
 
@@ -621,6 +749,23 @@ function deleteRanges(deviceId)
     })
 }
 
+function deleteFeeder(id)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.run(`DELETE FROM feeders WHERE id=${id};`, (err) =>
+        {
+            if (err)
+            {
+                reject(err);
+                return;
+            }
+
+            resolve();
+        })
+    })
+}
+
 function printTable(table)
 {
     db.all(`SELECT * FROM ${table}`, (err, rows) =>
@@ -639,16 +784,23 @@ exports.connect = connect;
 exports.addUser = addUser;
 exports.addDevice = addDevice;
 exports.addReading = addReading;
+exports.addFeeder = addFeeder;
 exports.getUser = getUser;
+exports.getUserFromId = getUserFromId;
 exports.getDeviceOwner = getDeviceOwner;
+exports.getDevice = getDevice;
 exports.getDevices = getDevices;
 exports.getReadings = getReadings;
 exports.getRanges = getRanges;
+exports.getFeeders = getFeeders;
+exports.getFeederOwner = getFeederOwner;
 exports.changeUserPassword = changeUserPassword;
 exports.updateRanges = updateRanges;
+exports.updateToken = updateToken;
 exports.deleteUser = deleteUser;
 exports.deleteDevice = deleteDevice;
 exports.deleteReadings = deleteReadings;
+exports.deleteFeeder = deleteFeeder;
 
 // debug
 exports.printTable = printTable;

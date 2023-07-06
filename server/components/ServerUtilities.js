@@ -15,20 +15,44 @@ function sendFile(res, filename, type)
 
 function sendObject(res, object)
 {
-    res.writeHead(200, {'Conent-type': 'application/json'});
-    res.end(JSON.stringify(object));
+    try
+    {
+        res.writeHead(200, {'Conent-type': 'application/json'});
+        res.end(JSON.stringify(object));
+    }
+    catch (error)
+    {
+        console.log("HTTP send failed: ");
+        console.log(error);
+    }
 }
 
 function sendInputError(res)
 {
-    res.writeHead(400)
-    res.end();
+    try
+    {
+        res.writeHead(400)
+        res.end();
+    }
+    catch (error)
+    {
+        console.log("HTTP send failed: ");
+        console.log(error);
+    }
 }
 
 function sendInternalError(res)
 {
-    res.writeHead(500)
-    res.end();
+    try
+    {
+        res.writeHead(500)
+        res.end();
+    }
+    catch (error)
+    {
+        console.log("HTTP send failed: ");
+        console.log(error);
+    }
 }
 
 exports.sendFile = sendFile;

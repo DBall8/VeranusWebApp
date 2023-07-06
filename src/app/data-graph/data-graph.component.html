@@ -11,11 +11,11 @@
     <!-- Option time period of readings -->
     <span class="graphOptionText">Show readings from:</span>
     <select #range (change)="changeRange()">
-        <option value="1day">Past Day</option>
+        <option value="1day" selected>Past Day</option>
         <option value="3day">Past 3 Days</option>
         <option value="1week">Past Week</option>
         <option value="1month">Past Month</option>
         <option value="3month">Past 3 Months</option>
-        <option value="all" selected>All</option>
+        <option value="all">All</option>
     </select>
 </div>

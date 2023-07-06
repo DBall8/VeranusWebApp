@@ -22,6 +22,11 @@
     cursor: pointer;
 }
 
+.deviceBar:hover
+{
+    background-color: #ca8d6e;
+}
+
 .readingType
 {
     font-size: 0.5em;

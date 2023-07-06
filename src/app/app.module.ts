@@ -13,6 +13,7 @@ import { DeviceBarComponent } from './device-bar/device-bar.component';
 import { TimestampComponent } from './timestamp/timestamp.component';
 import { DataViewComponent } from './data-view/data-view.component';
 import { DataGraphComponent } from './data-graph/data-graph.component';
+import { CavyCamComponent } from './cavy-cam/cavy-cam.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { DataGraphComponent } from './data-graph/data-graph.component';
     DeviceBarComponent,
     TimestampComponent,
     DataViewComponent,
-    DataGraphComponent
+    DataGraphComponent,
+    CavyCamComponent
   ],
   imports: [
     BrowserModule,

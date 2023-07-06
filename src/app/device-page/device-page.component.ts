@@ -12,7 +12,7 @@ import { Device } from '../objects/device';
 export class DevicePageComponent implements OnInit {
 
   device?: Device = null;
-  numReadings: number = 1000;
+  numReadings: number = 100000;
 
   readings: any[] = [];
 

@@ -158,6 +158,51 @@ function logout(req, res)
     res.redirect('/login');
 }
 
+/*
+ * POST request with body
+ * {
+ *      token: string
+ * }
+ */
+function updateUserToken(req, res)
+{
+    if (!req.userId || !req.body) { server.sendInputError(res); }
+
+    var body = JSON.parse(req.body);
+
+    if (!body || !body.token) { server.sendInputError(res); }
+
+    db.updateToken(req.userId, body.token).then(() =>
+    {
+        console.log("Token for user " + req.userId + " successfully updated.")
+        server.sendObject(res, JSON.stringify({success: true}));
+    })
+    .catch((err) =>
+    {
+        console.log("Failed to update user's token:");
+        console.log(err);
+        server.sendInternalError(res);
+    })
+}
+
+function getUserToken(userId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.getUserFromId(userId)
+        .then((user) =>
+        {
+            resolve(user.token);
+        })
+        .catch((err) =>
+        {
+            reject(err);
+        })
+    });
+}
+
 exports.attemptLogin = attemptLogin;
 exports.attemptNewUser = attemptNewUser;
 exports.logout = logout;
+exports.updateUserToken = updateUserToken;
+exports.getUserToken = getUserToken;
