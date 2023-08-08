@@ -114,7 +114,7 @@ function createApp()
     {
         // Extract the path from the request, and add it to the angular build directory
         var uri = url.parse(req.url);
-        var path = __dirname + '/../dist/VeranusWebApp' + uri.pathname
+        var path = __dirname + '/../dist/veranus-web-app' + uri.pathname
 
         // Extract the file type
         var split = uri.pathname.split('.');
@@ -129,7 +129,7 @@ function createApp()
             utilities.sendFile(res, path, fileType);
         }
         else{
-            utilities.sendFile(res, __dirname + '/../dist/VeranusWebApp/index.html');
+            utilities.sendFile(res, __dirname + '/../dist/veranus-web-app/index.html');
         }
     });
 
