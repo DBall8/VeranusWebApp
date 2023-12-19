@@ -97,6 +97,8 @@ function createApp()
             success: true
         };
 
+        notificationManager.sendTest(req.username, req.query.tag);
+
         res.writeHead(200);
         res.end(JSON.stringify(response));
     });

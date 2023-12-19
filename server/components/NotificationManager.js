@@ -20,6 +20,9 @@ const WARNING_LOW = -1;
 const DANGER_LOW = -2;
 const RANGE_ERR = 99;
 
+const DANGER_COLOR = "#DD4F4F"
+const WARNING_COLOR = "#D9D936"
+
 /*
  * deviceId:
  * {
@@ -28,13 +31,37 @@ const RANGE_ERR = 99;
  *      humidityLevel: int
  *      lightLevel: int
  *      offlineTimer: timer
+ *      activeTag: string
  * }
  */
 var activeDevices = {};
 
-function sendNotification(deviceId, title, msgBody)
+function getUserToken(username)
 {
-    deviceManager.getDeviceOwner(deviceId)
+    return new Promise((resolve, reject) =>
+    {
+        db.getUser(username)
+        .then((user) =>
+        {
+            if (!user || !user.token)
+            {
+                reject("Cannot find info for user " + userName);
+                return;
+            }
+            resolve(user.token);
+        })
+        .catch((err) =>
+        {
+            reject(err);
+        })
+    })
+}
+
+function getDeviceOwnerToken(deviceId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        deviceManager.getDeviceOwner(deviceId)
         .then((userId) =>
         {
             userManager.getUserToken(userId)
@@ -42,47 +69,64 @@ function sendNotification(deviceId, title, msgBody)
             {
                 if (!token)
                 {
-                    console.log("User " + userId + " has no token.");
+                    reject("User " + userId + " has no token.");
                     return;
                 }
-
-                const message = 
-                    {
-                        notification:
-                        {
-                            title: title,
-                            body: msgBody
-                        }
-                    };
-                const options = 
-                {
-                    priority: "high",
-                    timeToLive: 60 * 60 * 24
-                };
-                firebase.admin.messaging().sendToDevice(token, message, options)
-                    .then((response) =>
-                    {
-                        if (response.failureCount > 0)
-                        {
-                            console.log("Notif for device " + deviceId + " failed.");
-                        }
-                    })
-                    .catch((err) =>
-                    {
-                        console.log("Sending push notif failed:");
-                        console.log(err);
-                    })
+                resolve(token);
+            })
+            .catch((err) =>
+            {
+                reject("Failed to get token from user: " + err);
+            })
         })
         .catch((err) =>
         {
-            console.log("Failed to get FB token for user [" + userId + "]");
-            console.log(err);
+            reject(err);
         })
     })
-    .catch((err) =>
+}
+
+function sendNotification(token, tag, title, msgBody, color)
+{
+    if (!token)
     {
-        console.log("Could not find ownder of device " + deviceId);
-    })
+        console.error("Not token provided for notif.");
+        return;
+    }
+
+    const message = 
+    {
+        token: token,
+        notification:
+        {
+            title: title,
+            body: msgBody,
+        },
+        android:
+        {
+            ttl: 1000 * 60 * 60 * 3,
+            notification:
+            {
+                tag: tag,
+                color: color,
+                priority: 'high'
+            },
+        }
+    };
+
+    firebase.admin.messaging().send(message)
+        .then((response) =>
+        {
+            if (response.failureCount > 0)
+            {
+                console.log("Notif for device " + deviceId + " failed.");
+            }
+        })
+        .catch((err) =>
+        {
+            console.log("Sending push notif failed:");
+            console.log(err);
+        })
 }
 
 function getStatus(range, value)
@@ -114,6 +158,7 @@ function getStatus(range, value)
 
 function shouldChangeTriggerAlert(oldReading, newReading)
 {
+    /* OLD METHOD FOR TRIGGER NOTIFICATIONS
     if (newReading == RANGE_ERR) return false;  // Currently in error
     if (oldReading == newReading) return false; // No change
 
@@ -128,6 +173,9 @@ function shouldChangeTriggerAlert(oldReading, newReading)
 
     // Value has changed, but has moved to lower danger level
     return false;
+    */
+
+    return (newReading != READING_OK);
 }
 
 function sendAlert(deviceId, type, level)
@@ -137,24 +185,29 @@ function sendAlert(deviceId, type, level)
     var tagStr = "ERROR";
     var descStr = "ERROR";
     var devName = activeDevices[deviceId].name;
+    var color = "";
 
     switch (level)
     {
         case DANGER_HIGH:
             tagStr = DANGER_TAG;
             descStr = DANGER_DESC + " " + HIGH_DESC;
+            color = DANGER_COLOR;
             break;
         case WARNING_HIGH:
             tagStr = WARNING_TAG;
             descStr = WARNING_DESC + " " + HIGH_DESC;
+            color = WARNING_COLOR;
             break;
         case WARNING_LOW:
             tagStr = WARNING_TAG;
             descStr = WARNING_DESC + " " + LOW_DESC;
+            color = WARNING_COLOR;
             break;
         case DANGER_LOW:
             tagStr = DANGER_TAG;
             descStr = DANGER_DESC + " " + LOW_DESC;
+            color = DANGER_COLOR;
             break;
         default:
             break;
@@ -165,10 +218,27 @@ function sendAlert(deviceId, type, level)
     console.log("Sending alert:");
     console.log(notifBody);
 
+    getDeviceOwnerToken(deviceId)
+    .then((token) =>
+    {
+        if (!token)
+        {
+            console.log("User " + userId + " has no token.");
+            return;
+        }
+
+        sendNotification(token, deviceId, NOTIF_TITLE, notifBody, color);
+    })
+    .catch((err) =>
+    {
+        console.log("Failed to get device's token: " + err);
+    })
+
     sendNotification(
         deviceId,
         NOTIF_TITLE,
-        notifBody);
+        notifBody,
+        color);
 }
 
 function updateDevice(deviceId, newReadings)
@@ -234,7 +304,8 @@ function handleReadings(deviceId, newReadings)
                 tempLevel: 0,
                 humidityLevel: 0,
                 lightLevel: 0,
-                offlineTimer: setTimeout(() => sendOfflineMessage(deviceId), SETTINGS.DEVICE_TIMEOUT_MS)
+                offlineTimer: setTimeout(() => sendOfflineMessage(deviceId), SETTINGS.DEVICE_TIMEOUT_MS),
+                activeTag: ""
             };
 
             updateDevice(deviceId, newReadings);
@@ -254,51 +325,17 @@ function handleReadings(deviceId, newReadings)
     }
 }
 
-function sendTest(userName)
+function sendTest(userName, tag)
 {
-    db.getUser(userName)
-    .then((user) =>
+    getUserToken(userName)
+    .then((token) =>
     {
-        if (!user || !user.token)
-        {
-            console.log("Cannot find info for user " + userName);
-            return;
-        }
-
-        const message = 
-            {
-                notification:
-                {
-                    title: "Test Message",
-                    body: "This is a test message for user " + userName
-                }
-            };
-        const options = 
-        {
-            priority: "high",
-            timeToLive: 60 * 60 * 24
-        };
-        firebase.admin.messaging().sendToDevice(user.token, message, options)
-            .then((response) =>
-            {
-                if (response.failureCount > 0)
-                {
-                    console.log("Test message failed.");
-                }
-                else
-                {
-                    console.log("Test message sent to " + userName);
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("Sending push notif failed:");
-                console.log(err);
-            })
+        sendNotification(token, tag, "Test Title", "User: " + userName, DANGER_COLOR);
     })
     .catch((err) =>
     {
-        reject(err);
+        console.log("Failed to send push notif.");
+        console.log(err)
     })
 }
 
