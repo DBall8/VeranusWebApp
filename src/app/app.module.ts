@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { MatSliderModule } from '@angular/material/slider'
 
 import { AppComponent } from './app.component';
 import { LoginPageComponent } from './login-page/login-page.component';
@@ -14,6 +15,8 @@ import { TimestampComponent } from './timestamp/timestamp.component';
 import { DataViewComponent } from './data-view/data-view.component';
 import { DataGraphComponent } from './data-graph/data-graph.component';
 import { CavyCamComponent } from './cavy-cam/cavy-cam.component';
+import { RangeSliderComponent } from './range-slider/range-slider.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -26,13 +29,16 @@ import { CavyCamComponent } from './cavy-cam/cavy-cam.component';
     TimestampComponent,
     DataViewComponent,
     DataGraphComponent,
-    CavyCamComponent
+    CavyCamComponent,
+    RangeSliderComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    MatSliderModule,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

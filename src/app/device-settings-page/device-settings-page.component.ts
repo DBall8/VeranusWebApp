@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router'
 
 import { DeviceService } from '../services/device.service'
 import { Device } from '../objects/device';
+import { Reading } from '../objects/reading';
 
 @Component({
   selector: 'app-device-settings-page',
@@ -12,8 +13,14 @@ import { Device } from '../objects/device';
 export class DeviceSettingsPageComponent implements OnInit {
 
     @ViewChild('UploadFile', {static: false}) uploadFile: ElementRef;
+    @ViewChild('ThresholdsContainer', {static: false}) thresholdsContainer: ElementRef;
 
     device: Device;
+
+    minTemperature: number = Reading.MIN_TEMPERATURE;
+    maxTemperature: number = Reading.MAX_TEMPERATURE;
+    minPercent: number = Reading.MIN_PERCENT;
+    maxPercent: number = Reading.MAX_PERCENT;
 
     constructor(private deviceService: DeviceService, private route: ActivatedRoute, private router: Router) { }
 

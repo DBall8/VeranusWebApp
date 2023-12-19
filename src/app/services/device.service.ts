@@ -12,6 +12,8 @@ const debug = false;
 const socketUrl = debug ? "http://localhost:8002" : "https://veranus.site";
 const socketSecure: boolean = !debug;
 
+//test
+
 @Injectable({
   providedIn: 'root'
 })

@@ -3,6 +3,9 @@
 # database
 /db
 
+# secrets
+/creds
+
 # compiled output
 /dist
 /tmp

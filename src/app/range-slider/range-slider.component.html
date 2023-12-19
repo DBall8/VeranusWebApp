@@ -1,0 +1,56 @@
+<div id="RangeSlider"
+    [ngStyle]="fullObjectStyle">
+    <div style="position:relative;">
+        <canvas #LineCanvas
+            class="sliderCanvas"
+            [ngStyle]="getSliderStyle()"></canvas>
+        <div #DLowThumb class="fullThumbBlock" [ngStyle]="dLowThumbPosition">
+            <div class="thumbLabel"
+                [ngStyle]="getThumbLabelStyle('danger')"
+                (mousedown)="handleMouseDown($event, 'dLow')"
+                (touchstart)="handleTouchStart($event, 'dLow')"
+                >{{valueRange.dangerLow + unitLabel}}</div>
+            <div #DLowThumbSelector class="danger thumb"
+                [ngStyle]="thumbStyle"
+                (mousedown)="handleMouseDown($event, 'dLow')"
+                (touchstart)="handleTouchStart($event, 'dLow')">
+            </div>
+        </div>
+        <div #WLowThumb class="fullThumbBlock" [ngStyle]="wLowThumbPosition">
+            <div class="warning thumb"
+                [ngStyle]="thumbStyle"
+                (mousedown)="handleMouseDown($event, 'wLow')"
+                (touchstart)="handleTouchStart($event, 'wLow')">
+            </div>
+            <div class="thumbLabel"
+                [ngStyle]="getThumbLabelStyle('warning')"
+                (mousedown)="handleMouseDown($event, 'wLow')"
+                (touchstart)="handleTouchStart($event, 'wLow')"
+                >{{valueRange.warningLow + unitLabel}}</div>
+        </div>
+        <div #WHighThumb class="fullThumbBlock" [ngStyle]="wHighThumbPosition">
+            <div class="warning thumb"
+                [ngStyle]="thumbStyle"
+                (mousedown)="handleMouseDown($event, 'wHigh')"
+                (touchstart)="handleTouchStart($event, 'wHigh')">
+            </div>
+            <div class="thumbLabel"
+                [ngStyle]="getThumbLabelStyle('warning')"
+                (mousedown)="handleMouseDown($event, 'wHigh')"
+                (touchstart)="handleTouchStart($event, 'wHigh')"
+                >{{valueRange.warningHigh + unitLabel}}</div>
+        </div>
+        <div #DHighThumb class="fullThumbBlock" [ngStyle]="dHighThumbPosition">
+            <div class="thumbLabel"
+                [ngStyle]="getThumbLabelStyle('danger')"
+                (mousedown)="handleMouseDown($event, 'dHigh')"
+                (touchstart)="handleTouchStart($event, 'dHigh')"
+                >{{valueRange.dangerHigh + unitLabel}}</div>
+            <div class="danger thumb"
+                [ngStyle]="thumbStyle"
+                (mousedown)="handleMouseDown($event, 'dHigh')"
+                (touchstart)="handleTouchStart($event, 'dHigh')">
+            </div>
+        </div>
+    </div>
+</div>

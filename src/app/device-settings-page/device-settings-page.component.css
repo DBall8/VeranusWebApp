@@ -22,9 +22,14 @@
     max-width: 600px;
 }
 
-h2
+.deviceNameHeader
 {
     font-size: 3em;
+}
+
+h2
+{
+    font-size: 2em;
     padding: 10px;
     margin: 0;
 }
@@ -38,28 +43,6 @@ h2
     display: inline-block;
 }
 
-.thresholdTable
-{
-    background-color: #b07c5d;
-    border: 2px solid black;
-}
-
-.topRow
-{
-    background-color: #262626;
-}
-
-.thresholdTable td, th
-{
-    padding: 20px 5px;
-    border: 1px solid black;
-}
-
-th
-{
-    font-weight: bold;
-    font-size: 1.2em;
-}
 
 .dangerText
 {
@@ -106,3 +89,25 @@ th
   .deleteButton:focus{
     background-color: #b82a2a;;
   }
+
+.rangeLabel
+{
+    text-align: center;
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 50px;
+}
+
+.colorExample
+{
+    background-color: #262626;
+    padding: 0px 2px 0px 2px;
+}
+
+.thresholdSlider
+{
+    display: block;
+    width: 90%;
+    margin: auto;
+}

@@ -15,4 +15,20 @@ export class ValueRange
         this.warningLow = warningLow;
         this.warningHigh = warningHigh;
     }
+
+    public isEqual(other: ValueRange): boolean
+    {
+        return (this.dangerLow == other.dangerLow) &&
+                (this.warningLow == other.warningLow) &&
+                (this.warningHigh == other.warningHigh) &&
+                (this.dangerHigh == other.dangerHigh);
+    }
+
+    public copy(other: ValueRange)
+    {
+        this.dangerLow = other.dangerLow;
+        this.warningLow = other.warningLow;
+        this.warningHigh = other.warningHigh;
+        this.dangerHigh = other.dangerHigh;
+    }
 }

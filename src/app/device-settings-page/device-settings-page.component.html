@@ -9,61 +9,71 @@
 
     <!-- Device title -->
     <div class="centeredArea">
-        <h2 class="centeredArea">{{device.name}}</h2>
+        <h2 class="centeredArea deviceNameHeader">{{device.name}}</h2>
         <img src="{{ 'images/' + this.device.id}}" class="deviceImage" alt="" style="height: auto;"><br>
     </div>
     <br>
 
-    <!-- Device settings -->
+    <!-- Device thresholds -->
+    <div #ThresholdsContainer class="pageSection">
+        <h2>Device Thresholds:</h2>
+        <p><span style="font-weight:bold;">Set the thresholds at which warnings should trigger.</span><br>
+        <span class="safeText colorExample">Green</span> indicates safe conditions<br>
+        <span class="warningText colorExample">Yellow</span> indicates a warning that conditions are worsening<br>
+        <span class="dangerText colorExample">Red</span> indicates dangerous conditions</p>
+        <!-- Temperature Range Slider -->
+        <div class="thresholdSlider">
+            <h3 class="rangeLabel">Temperature</h3>
+            <app-range-slider
+                style="width:100%"
+                [minVal]="minTemperature"
+                [maxVal]="maxTemperature"
+                [valueRange]="device.temperatureRange"
+                [scale]="20"
+                [unitLabel]="'°F'"
+                class="rangeSliderContainer"
+            ></app-range-slider>
+        </div>
+        <!-- Humidity Range Slider -->
+        <div class="thresholdSlider">
+            <h3 class="rangeLabel">Humidity</h3>
+            <app-range-slider
+                style="width:100%"
+                [minVal]="minPercent"
+                [maxVal]="maxPercent"
+                [valueRange]="device.humidityRange"
+                [scale]="20"
+                [unitLabel]="'%'"
+                class="rangeSliderContainer"
+            ></app-range-slider>
+        </div>
+        <!-- Light Range Slider -->
+        <div class="thresholdSlider">
+            <h3 class="rangeLabel">Light</h3>
+            <app-range-slider
+                style="width:100%"
+                [minVal]="minPercent"
+                [maxVal]="maxPercent"
+                [valueRange]="device.lightRange"
+                [scale]="20"
+                [unitLabel]="'%'"
+                class="rangeSliderContainer"
+            ></app-range-slider>
+        </div>
+        <input type="button" class="button largeSettingsButton" value="Save Settings" (click)="saveRanges()">
+
+    </div>
+    <!-- Upload image -->
     <div class="pageSection">
-        <h2>Device settings:</h2>
-        <h3>Upload Image</h3>
+        <h2>Upload Image</h2>
         <p>Upload an image for this device.</p>
         <input type="file"  #UploadFile accept="image/x-png,image/gif,image/jpeg"><br>
         <input type="button" class="button" value="Upload Image" (click)="uploadImage()">
         <input type="button" class="button deleteButton" value="Remove Image" (click)="removeImage()">
-
-        <h3>Warning and Danger Thresholds</h3>
-        <p>Set the measurements at which we turn the reading from green to yellow to indicate the
-            measurement is near a dangerous level, and when it turns from yellow to red indicating
-            it is at a dangerous level.</p>
-        <table class="thresholdTable">
-            <tr>
-                <th class="topRow"></th> <th class="warningText topRow">Warning</th> <th class="dangerText topRow">Danger</th>
-            </tr>
-            <tr>
-                <th>Temperature</th>
-                <td class="thresholdInputCell">
-                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.warningLow">&deg;F<br>
-                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.warningHigh">&deg;F</td>
-                <td class="thresholdInputCell">
-                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.dangerLow">&deg;F<br>
-                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.temperatureRange.dangerHigh">&deg;F</td>
-            </tr>
-            <tr>
-                <th>Humidity</th>
-                <td class="thresholdInputCell">
-                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.warningLow">%<br>
-                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.warningHigh">%</td>
-                <td class="thresholdInputCell">
-                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.dangerLow">%<br>
-                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.humidityRange.dangerHigh">%</td>
-            </tr>
-            <tr>
-                <th>Light</th>
-                <td class="thresholdInputCell">
-                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.warningLow">%<br>
-                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.warningHigh">%</td>
-                <td class="thresholdInputCell">
-                    Below: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.dangerLow">%<br>
-                    Above: <input type="text" class="thresholdInput" [(ngModel)]="device.lightRange.dangerHigh">%</td>
-            </tr>
-        </table>
-        <input type="button" class="button largeSettingsButton" value="Save Settings" (click)="saveRanges()">
-
     </div>
+    <!-- Delete -->
     <div class="pageSection">
-        <h3>Delete this device</h3>
+        <h2>Delete this device</h2>
         <p>WARNING this will permanently delete all recorded readings from this device</p>
         <input type="button" class="button largeSettingsButton deleteButton" value="Delete Device" (click)="deleteDevice()">
     </div>

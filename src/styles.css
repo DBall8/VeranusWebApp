@@ -65,3 +65,37 @@ img {
     font-size: 2em;
     margin: 5px;
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.danger
+{
+  background-color: #dd4f4f;
+}
+
+.warning
+{
+
+  background-color: #d9d936;
+}
+
+.safe
+{
+  background-color: #159715;
+}
+
+.dangerText
+{
+  color: #dd4f4f;
+}
+
+.warningText
+{
+
+  color: #d9d936;
+}
+
+.safeText
+{
+  color: #159715;
+}
