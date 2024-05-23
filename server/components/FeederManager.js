@@ -15,6 +15,8 @@ const STATUS_CMD = "status";
 const STATUS_CMD_R = "status_r";
 const CMD_CMD = "cmd";
 const CMD_CMD_R = "cmd_r";
+const CAL_CMD = "cal";
+const CAL_CMD_R = "cal_r";
 const LOG_CMD = "log";
 
 /**
@@ -71,6 +73,17 @@ function initFeederControl(server)
             if (!activeFeeders[feederConn.id]) return;
             if (!activeFeeders[feederConn.id].callback) return;
             if (activeFeeders[feederConn.id].callback.cmd != STATUS_CMD_R) return;
+
+            activeFeeders[feederConn.id].callback.func(msg);
+        });
+
+        feederConn.on(CAL_CMD_R, (msg) =>
+        {
+            console.log("Socket rec " + CAL_CMD_R + " of " + msg);
+
+            if (!activeFeeders[feederConn.id]) return;
+            if (!activeFeeders[feederConn.id].callback) return;
+            if (activeFeeders[feederConn.id].callback.cmd != CAL_CMD_R) return;
 
             activeFeeders[feederConn.id].callback.func(msg);
         });
@@ -216,11 +229,12 @@ function getFeeders(req, res)
  * }
  * 
  * Where status val:
- * 0 = Open
- * 1 = Closed
- * 2 = Ajar
- * 3 = Hopper error
- * 4 = Server error
+ * 0 = Uncalibrated
+ * 1 = Open
+ * 2 = Closed
+ * 3 = Ajar
+ * 4 = Hopper error
+ * 5 = Server error
  */
 function getFeederStatus(req, res)
 {
@@ -304,13 +318,13 @@ function getFeederStatus(req, res)
 /**
  * Input:
  * {
- *      feederId: string,
+ *      id: string,
  *      status: int
  * }
  * 
  * Where status:
- *  0 = OPEN
- *  1 = CLOSE
+ *  1 = OPEN
+ *  2 = CLOSE
  * 
  * Output:
  * {
@@ -364,6 +378,8 @@ function controlFeeder(req, res)
         {
             clearTimeout(feederObj.timeoutTimer);
         }
+
+        console.log("FEEDER RESP: " + msg);
 
         if (msg == null)
         {
@@ -453,9 +469,107 @@ function deleteFeeder(req, res)
         })
 }
 
+/**
+ * Input:
+ * {
+ *      id: string,
+ *      step: string 
+ * }
+ * 
+ * Where step:
+ *   start
+ *   open
+ *   close
+ *
+ * Output:
+ * {
+ *      success: boolean
+ * }
+ */
+function calibrateFeeder(req, res)
+{
+    let calStep = null;
+
+    if (!req.body)
+    {
+        server.sendInputError(res);
+        return;
+    }
+
+    let body = JSON.parse(req.body);
+    if (!body || !body.id || !body.step)
+    {
+        server.sendInputError(res);
+        return;
+    }
+
+    if (body.step.toLowerCase() === 'start')
+    {
+        calStep = 'S';
+    }
+    else if (body.step.toLowerCase() === 'open')
+    {
+        calStep = 'O';
+    }
+    else if (body.step.toLowerCase() === 'close')
+    {
+        calStep = 'C';
+    }
+    else
+    {
+        server.sendInputError(res);
+        return;
+    }
+
+    let feederObj = getFeederSocket(body.id);
+    if (!feederObj)
+    {
+        // No connected feeder with this ID
+        server.sendInternalError(res);
+        return;
+    }
+
+    feederObj.callback = {};
+    feederObj.callback.cmd = CAL_CMD_R;
+    feederObj.callback.func = (msg) =>
+    {
+        if (feederObj.timeoutTimer)
+        {
+            clearTimeout(feederObj.timeoutTimer);
+        }
+
+        if (msg == null)
+        {
+            server.sendInternalError(res);
+            return;
+        }
+
+        let success = (msg == "pass");
+        let responseBody =
+        {
+            success: success,
+            id: body.id
+        };
+
+        server.sendObject(res, responseBody);
+    };
+
+    feederObj.timeoutTimer = setTimeout(() =>
+        {
+            feederObj.callback = null;
+            server.sendInternalError(res);
+        },
+        SETTINGS.FEEDER_CAL_TIMEOUT_MS);
+    
+    // Send a status command
+    console.log("Feeder " + body.id + " cal step " + body.step);
+    feederObj.socket.emit(CAL_CMD, calStep);
+}
+
 exports.initFeederControl = initFeederControl;
 exports.addFeeder = addFeeder;
 exports.getFeeders = getFeeders;
 exports.getFeederStatus = getFeederStatus;
 exports.controlFeeder = controlFeeder;
 exports.deleteFeeder = deleteFeeder;
+exports.calibrateFeeder = calibrateFeeder;

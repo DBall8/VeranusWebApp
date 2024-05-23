@@ -64,7 +64,7 @@ function createApp()
     app.post('/login', userManager.attemptLogin);                   // Existing user login attempt
     app.post('/newuser', userManager.attemptNewUser);               // Create new user attempt
     app.get('/logout', userManager.logout);                         // Log out user session
-    app.post('/token', requireLogin, userManager.updateUserToken); // Update a firebase token for this user
+    app.post('/token', requireLogin, userManager.updateUserToken);  // Update a firebase token for this user
 
     // Handle device requests
     app.get('/device', requireLogin, deviceManager.getDevices);       // Get list of devices for a user
@@ -80,11 +80,12 @@ function createApp()
     app.post('/ranges', requireLogin, deviceManager.updateRanges);    // Update the ranges for a device
 
     // Handle feeder requests
-    app.get('/feeders', requireLogin, feederManager.getFeeders);    // Get the list of feeders for this user
-    app.put('/feeder', requireLogin, feederManager.addFeeder);      // Add a new feeder for this user
-    app.get('/feeder', requireLogin, feederManager.getFeederStatus);// Get the Open/closed status of a feeder
-    app.post('/feeder', requireLogin, feederManager.controlFeeder); // Open or close a feeder
-    app.delete('/feeder', requireLogin, feederManager.deleteFeeder);// Delete a feeder
+    app.get('/feeders', requireLogin, feederManager.getFeeders);                // Get the list of feeders for this user
+    app.put('/feeder', requireLogin, feederManager.addFeeder);                  // Add a new feeder for this user
+    app.get('/feeder', requireLogin, feederManager.getFeederStatus);            // Get the Open/closed status of a feeder
+    app.post('/feeder', requireLogin, feederManager.controlFeeder);             // Open or close a feeder
+    app.delete('/feeder', requireLogin, feederManager.deleteFeeder);            // Delete a feeder
+    app.post('/feeder/calibrate', requireLogin, feederManager.calibrateFeeder); // Calibrate a feeder
 
     // Cavy cam functions
     app.get('/capture', cavyCam.handleCapture);
