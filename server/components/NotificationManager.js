@@ -23,6 +23,8 @@ const RANGE_ERR = 99;
 const DANGER_COLOR = "#DD4F4F"
 const WARNING_COLOR = "#D9D936"
 
+const WARNING_COOLDOWN_MS = 1000 * 60 * 60 * 12; // 12 hours
+
 /*
  * deviceId:
  * {
@@ -32,9 +34,36 @@ const WARNING_COLOR = "#D9D936"
  *      lightLevel: int
  *      offlineTimer: timer
  *      activeTag: string
+ *      warningCooldownStart: int
  * }
  */
 var activeDevices = {};
+
+function addActiveDevice(deviceId)
+{
+    return new Promise((resolve, reject) =>
+    {
+        db.getDevice(deviceId)
+        .then((device) =>
+        {
+            activeDevices[deviceId] =
+            {
+                name: device.name,
+                tempLevel: 0,
+                humidityLevel: 0,
+                lightLevel: 0,
+                offlineTimer: setTimeout(() => sendOfflineMessage(deviceId), SETTINGS.DEVICE_TIMEOUT_MS),
+                activeTag: "",
+                warningCooldownStart: 0,
+            };
+            resolve();
+        })
+        .catch((err) =>
+        {
+            reject("Get device failed:\n" + err);
+        });
+    });
+}
 
 function getUserToken(username)
 {
@@ -156,7 +185,7 @@ function getStatus(range, value)
     return READING_OK;
 }
 
-function shouldChangeTriggerAlert(oldReading, newReading)
+function shouldChangeTriggerAlert(devcice, oldReading, newReading)
 {
     /* OLD METHOD FOR TRIGGER NOTIFICATIONS
     if (newReading == RANGE_ERR) return false;  // Currently in error
@@ -174,6 +203,29 @@ function shouldChangeTriggerAlert(oldReading, newReading)
     // Value has changed, but has moved to lower danger level
     return false;
     */
+
+    // Clear warning cooldown if state has changed
+    if (newReading != oldReading)
+    {
+        device.warningCooldownStart = 0;
+    }
+
+    let isWarningOld = (oldReading == WARNING_LOW) || (oldReading == WARNING_HIGH);
+    let isWarningNew = (newReading == WARNING_LOW) || (newReading == WARNING_HIGH);
+    let isWarningCooldown = (Date.now() - device.warningCooldownStart) < WARNING_COOLDOWN_MS;
+
+    if (isWarningNew && isWarningCooldown)
+    {
+        // Warning is in cooldown period, do not notify again
+        return false;
+    }
+
+    // Restart the cooldown is warning just started, or if cooldown has elapsed
+    if (isWarningNew &&
+        (!isWarningOld || !isWarningCooldown))
+    {
+        device.warningCooldownStart = Date.now();
+    }
 
     return (newReading != READING_OK);
 }
@@ -246,24 +298,27 @@ function updateDevice(deviceId, newReadings)
     if (!activeDevices[deviceId] || !newReadings) return;
     var deviceData = activeDevices[deviceId];
 
+    clearTimeout(activeDevices[deviceId].offlineTimer);
+    activeDevices[deviceId].offlineTimer = setTimeout(() => sendOfflineMessage(deviceId), SETTINGS.DEVICE_TIMEOUT_MS);
+
     db.getRanges(deviceId)
     .then((ranges) =>
     {
         var newTempLevel = getStatus(ranges.temperatureRange, newReadings.temperature);
-        if (shouldChangeTriggerAlert(deviceData.tempLevel, newTempLevel))
+        if (shouldChangeTriggerAlert(deviceData, deviceData.tempLevel, newTempLevel))
         {
             sendAlert(deviceId, "temperature", newTempLevel);
         }
 
         var newHumidityLevel = getStatus(ranges.humidityRange, newReadings.humidity);
-        if (shouldChangeTriggerAlert(deviceData.humidityLevel, newHumidityLevel))
+        if (shouldChangeTriggerAlert(deviceData, deviceData.humidityLevel, newHumidityLevel))
         {
             sendAlert(deviceId, "humidity", newHumidityLevel);
             
         }
 
         var newLightLevel = getStatus(ranges.lightRange, newReadings.light);
-        if (shouldChangeTriggerAlert(deviceData.lightLevel, newLightLevel))
+        if (shouldChangeTriggerAlert(deviceData, deviceData.lightLevel, newLightLevel))
         {
             sendAlert(deviceId, "light", newLightLevel);
         }
@@ -294,35 +349,22 @@ function handleReadings(deviceId, newReadings)
 {
     if (!activeDevices[deviceId])
     {
-        // Add new active device object, but first get its name
-        db.getDevice(deviceId)
-        .then((device) =>
-        {
-            activeDevices[deviceId] =
+        // Add new active device object, then handle the reading 
+        addActiveDevice(deviceId)
+            .then((device) =>
             {
-                name: device.name,
-                tempLevel: 0,
-                humidityLevel: 0,
-                lightLevel: 0,
-                offlineTimer: setTimeout(() => sendOfflineMessage(deviceId), SETTINGS.DEVICE_TIMEOUT_MS),
-                activeTag: ""
-            };
-
-            updateDevice(deviceId, newReadings);
-        })
-        .catch((err) =>
-        {
-            console.log("Could not get device " + deviceId);
-            console.log(err);
-        })
+                updateDevice(deviceId, newReadings);
+            })
+            .catch((err) =>
+            {
+                console.log("[Notifs] Failed to add new device connection: " + deviceId);
+                console.log(err);
+            })
+        return;
     }
-    else
-    {
-        clearTimeout(activeDevices[deviceId].offlineTimer);
-        activeDevices[deviceId].offlineTimer = setTimeout(() => sendOfflineMessage(deviceId), SETTINGS.DEVICE_TIMEOUT_MS);
 
-        updateDevice(deviceId, newReadings);
-    }
+    // Update the device
+    updateDevice(deviceId, newReadings);
 }
 
 function sendTest(userName, tag)
