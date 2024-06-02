@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
-import * as io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 import { Device } from '../objects/device'
 import { Reading } from '../objects/reading'
