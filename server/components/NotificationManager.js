@@ -185,7 +185,7 @@ function getStatus(range, value)
     return READING_OK;
 }
 
-function shouldChangeTriggerAlert(devcice, oldReading, newReading)
+function shouldChangeTriggerAlert(device, oldReading, newReading)
 {
     /* OLD METHOD FOR TRIGGER NOTIFICATIONS
     if (newReading == RANGE_ERR) return false;  // Currently in error
@@ -203,6 +203,12 @@ function shouldChangeTriggerAlert(devcice, oldReading, newReading)
     // Value has changed, but has moved to lower danger level
     return false;
     */
+
+    if (!device)
+    {
+        console.error("ERROR - shouldChangeTriggerAlert with null device");
+        return;
+    }
 
     // Clear warning cooldown if state has changed
     if (newReading != oldReading)
@@ -314,7 +320,6 @@ function updateDevice(deviceId, newReadings)
         if (shouldChangeTriggerAlert(deviceData, deviceData.humidityLevel, newHumidityLevel))
         {
             sendAlert(deviceId, "humidity", newHumidityLevel);
-            
         }
 
         var newLightLevel = getStatus(ranges.lightRange, newReadings.light);
@@ -332,9 +337,9 @@ function updateDevice(deviceId, newReadings)
         console.log("Failed to get ranges for device " + deviceId);
         console.log(err);
 
-        deviceData.tempLevel = newTempLevel;
-        deviceData.humidityLevel = newHumidityLevel;
-        deviceData.lightLevel = newLightLevel;
+        deviceData.tempLevel = RANGE_ERR;
+        deviceData.humidityLevel = RANGE_ERR;
+        deviceData.lightLevel = RANGE_ERR;
     })
 }
 
