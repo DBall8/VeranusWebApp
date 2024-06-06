@@ -42,9 +42,14 @@ function initFeederControl(server)
         {
             path: "/feeder_control",
             pingInterval: SETTINGS.HOPPER_HEARTBEAT_MS,
-            pingTimeout: SETTINGS.HOPPER_TIMEOUT_MS});
+            pingTimeout: SETTINGS.HOPPER_TIMEOUT_MS,
+            allowEIO3: true
+        });
     feederSocket.on('connect', (feederConn) =>
     {
+        feederConn.on("connect_error", (err) => {
+          console.log(`connect_error due to ${err.message}`);
+        });
         feederConn.on('disconnect', () =>
         {
             if (activeFeeders[feederConn.id] != undefined)
