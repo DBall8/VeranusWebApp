@@ -185,6 +185,26 @@ function getStatus(range, value)
     return READING_OK;
 }
 
+function isLow(reading)
+{
+    return (reading == WARNING_LOW) || (reading == DANGER_LOW);
+}
+
+function isHigh(reading)
+{
+    return (reading == WARNING_HIGH) || (reading == DANGER_HIGH);
+}
+
+function isDanger(reading)
+{
+    return (reading == DANGER_LOW) || (reading == DANGER_HIGH);
+}
+
+function isWarning(reading)
+{
+    return (reading == WARNING_LOW) || (reading == WARNING_HIGH);
+}
+
 function shouldChangeTriggerAlert(device, oldReading, newReading)
 {
     /* OLD METHOD FOR TRIGGER NOTIFICATIONS
@@ -211,7 +231,7 @@ function shouldChangeTriggerAlert(device, oldReading, newReading)
     }
 
     // Clear warning cooldown if state has changed
-    if (newReading != oldReading)
+    if (isDanger(newReading))
     {
         device.warningCooldownStart = 0;
     }
@@ -226,7 +246,7 @@ function shouldChangeTriggerAlert(device, oldReading, newReading)
         return false;
     }
 
-    // Restart the cooldown is warning just started, or if cooldown has elapsed
+    // Restart the cooldown if warning just started, or if cooldown has elapsed
     if (isWarningNew &&
         (!isWarningOld || !isWarningCooldown))
     {
