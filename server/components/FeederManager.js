@@ -6,9 +6,6 @@ var socketIo = require('socket.io');
 // Configuration settings
 const SETTINGS = require(__dirname + "/../settings.json");
 
-const OPEN_MSG = "<OPEN";
-const CLOSE_MSG = "<CLOSE";
-
 const ID_CMD = "id";
 const ID_CMD_R = "id_r"
 const STATUS_CMD = "status";
@@ -324,12 +321,8 @@ function getFeederStatus(req, res)
  * Input:
  * {
  *      id: string,
- *      status: int
+ *      command: string
  * }
- * 
- * Where status:
- *  1 = OPEN
- *  2 = CLOSE
  * 
  * Output:
  * {
@@ -345,28 +338,23 @@ function controlFeeder(req, res)
     }
 
     var body = JSON.parse(req.body);
-    if (!body || !body.id)
+    if (!body || !body.id || !body.command)
     {
         server.sendInputError(res);
         return;
     }
 
-    var cmd;
-    if (body.status == 1)
+    // Inspect input
+    let cmd = body.command;
+    cmd = cmd.trim();
+    if (cmd.match(/[],"\//) != null)
     {
-        cmd = OPEN_MSG;
-    }
-    else if (body.status == 2)
-    {
-        cmd = CLOSE_MSG;
-    }
-    else
-    {
+        // Inavlid characters included
         server.sendInputError(res);
         return;
     }
 
-    var feederObj = getFeederSocket(body.id);
+    let feederObj = getFeederSocket(body.id);
 
     if (!feederObj)
     {
@@ -422,8 +410,8 @@ function controlFeeder(req, res)
         SETTINGS.FEEDER_CMD_TIMEOUT_MS);
     
     // Send a status command
-    console.log("Asking feeder " + body.id + " to " + cmd);
-    feederObj.socket.emit(CMD_CMD, cmd);
+    console.log("Asking feeder " + body.id + " to " + body.command);
+    feederObj.socket.emit(CMD_CMD, body.command);
 }
 
 function deleteFeeder(req, res)

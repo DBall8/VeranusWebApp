@@ -43,6 +43,9 @@ export class LoginPageComponent implements OnInit {
     var username: string = this.usernameField.nativeElement.value;
     var password: string = this.passwordField.nativeElement.value;
 
+    // Trim whitespace
+    username = username.trim();
+
     if (!username)
     {
       this.showErrorMessage("Please enter a username");
@@ -90,6 +93,9 @@ export class LoginPageComponent implements OnInit {
     var username: string = this.usernameField.nativeElement.value;
     var password: string = this.passwordField.nativeElement.value;
     var confirmPassword: string = this.confirmPasswordField.nativeElement.value;
+
+    // Trim whitespace
+    username = username.trim();
 
     if (!username)
     {
